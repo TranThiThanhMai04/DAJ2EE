@@ -30,14 +30,8 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
+		<!-- <dependency>\n			<groupId>org.springframework.boot</groupId>\n			<artifactId>spring-boot-starter-data-jpa</artifactId>\n		</dependency> -->
+		<!-- <dependency>\n			<groupId>org.springframework.boot</groupId>\n			<artifactId>spring-boot-starter-security</artifactId>\n		</dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -46,10 +40,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
-		</dependency>
+		<!-- <dependency>\n			<groupId>org.thymeleaf.extras</groupId>\n			<artifactId>thymeleaf-extras-springsecurity6</artifactId>\n		</dependency> -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -72,11 +63,7 @@
 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf-test</artifactId>

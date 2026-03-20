@@ -31,3 +31,4 @@
 ## 8. Người 8 (Liêu) – Thông báo và báo cáo
 - Chủ nhà gửi thông báo cho người thuê (bảo trì, nhắc đóng tiền…).
 - Xuất báo cáo doanh thu và thống kê theo tháng.
+   

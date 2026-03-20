@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-Apartment | Trang Chủ Người Thuê</title>
+    <!-- Link tới file CSS tĩnh -->
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css">
+    <!-- Font Awesome cho icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-container">
+            <i class="fa-solid fa-building"></i>
+            <span>S-Apartment</span>
+        </div>
+        <ul class="nav-menu">
+            <a href="#" class="nav-item active">
+                <i class="fa-solid fa-home"></i>
+                Trang Chính
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-receipt"></i>
+                Hóa Đơn Của Tôi
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-wrench"></i>
+                Báo Sửa Chữa
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-bell"></i>
+                Thông Báo
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-credit-card"></i>
+                Thanh Toán Online
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-file-contract"></i>
+                Hợp Đồng Thuê
+            </a>
+            <a href="#" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
+                <i class="fa-solid fa-gear"></i>
+                Tài Khoản
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Đăng Xuất
+            </a>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header class="header">
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted)"></i>
+                <input type="text" placeholder="Tìm hóa đơn, thông báo...">
+            </div>
+            
+            <div class="profile-section">
+                <div class="notification-icon">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-badge">2</span>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: 600; font-size: 0.9rem;">Nguyễn Văn A</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Phòng 101 - Tầng 1</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <h1 class="page-title">Chào mừng quay lại, Văn A!</h1>
+            <p class="welcome-subtitle">Quản lý mọi thứ về phòng trọ của bạn ngay tại đây.</p>
+
+            <!-- Thống kê nhanh cho người thuê -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-green">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Hóa đơn tới hạn</h3>
+                        <div class="value danger">1</div>
+                        <small>Tháng 10/2026 - 1.200.000₫</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-blue">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Tổng nợ</h3>
+                        <div class="value">350.000₫</div>
+                        <small>Còn lại tháng trước</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-yellow">
+                        <i class="fa-solid fa-wrench"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Yêu cầu đang chờ</h3>
+                        <div class="value">1</div>
+                        <small>Báo hỏng vòi sen</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-purple">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Chỉ số hiện tại</h3>
+                        <div class="value">Điện: 245 kWh<br>Nước: 18 m³</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sections-grid">
+                <!-- Nhanh cho người thuê -->
+                <div class="feature-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="fa-solid fa-bolt-lightning" style="color: var(--primary-color);"></i>
+                            Chốt Chỉ Số Nhanh
+                        </h2>
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+                        Nhập chỉ số điện nước mới nhất để tạo hóa đơn tháng này.
+                    </p>
+                    <div class="quick-action-grid">
+                        <button class="quick-btn primary">
+                            <i class="fa-solid fa-bolt"></i>
+                            Chốt Điện
+                        </button>
+                        <button class="quick-btn secondary">
+                            <i class="fa-solid fa-tint"></i>
+                            Chốt Nước
+                        </button>
+                        <button class="quick-btn accent">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            Tạo Hóa Đơn
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thông báo quan trọng -->
+                <div class="feature-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="fa-solid fa-bullhorn" style="color: var(--secondary-color);"></i>
+                            Thông Báo Quan Trọng
+                        </h2>
+                    </div>
+                    <div class="notification-list">
+                        <div class="notification-item urgent">
+                            <div class="notif-icon">
+                                <i class="fa-solid fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="notif-content">
+                                <h4>Cắt nước tạm 12h-14h ngày mai</h4>
+                                <p>Bảo trì hệ thống cấp nước chung cư.</p>
+                                <span>20/10/2026</span>
+                            </div>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notif-icon">
+                                <i class="fa-solid fa-calendar"></i>
+                            </div>
+                            <div class="notif-content">
+                                <h4>Hạn đóng tháng 10: 25/10</h4>
+                                <p>Nhớ đóng trước ngày 25 để tránh phí trễ hạn.</p>
+                                <span>15/10/2026</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="view-all-btn">Xem tất cả thông báo</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
