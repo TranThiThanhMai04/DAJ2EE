@@ -1,4 +1,4 @@
-package DAJ2EE.demo;
+package DAJ2EE.demo.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
