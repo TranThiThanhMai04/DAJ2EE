@@ -17,4 +17,9 @@ public interface UserService {
      * Kiểm tra xem username (SĐT) đã tồn tại trong hệ thống chưa
      */
     boolean isUsernameExist(String username);
+
+    /**
+     * Kiểm tra xem email đã tồn tại trong hệ thống chưa
+     */
+    boolean isEmailExist(String email);
 }

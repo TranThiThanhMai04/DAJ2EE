@@ -41,31 +41,40 @@ public class AuthController {
     @PostMapping("/register")
     public String handleRegister(
             @Valid @ModelAttribute("registerForm") UserRegistrationDto dto,
-            BindingResult bindingResult, // Chứa kết quả validation từ @Valid
+            BindingResult bindingResult,
             Model model) {
 
-        // Bước 1: Kiểm tra lỗi validation (@NotBlank, @Email, @Size...)
+        // Bước 1: Kiểm tra lỗi validation (@NotBlank, @Email, @Pattern, @Size...)
         if (bindingResult.hasErrors()) {
-            // Có lỗi → quay lại form, Thymeleaf tự điền thông báo lỗi
             return "register";
         }
 
-        // Bước 2: Kiểm tra mật khẩu và xác nhận mật khẩu có khớp không
+        // Bước 2: Kiểm tra khớp mật khẩu
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            model.addAttribute("errorMessage", "Mật khẩu và xác nhận mật khẩu không khớp!");
+            bindingResult.rejectValue("confirmPassword", "error.registerForm", "Mật khẩu xác nhận không khớp");
             return "register";
         }
 
-        // Bước 3: Gọi service để đăng ký (service sẽ báo lỗi nếu SĐT trùng)
+        // Bước 3: Kiểm tra trùng lặp Số điện thoại (Username)
+        if (userService.isUsernameExist(dto.getPhone())) {
+            bindingResult.rejectValue("phone", "error.registerForm", "Số điện thoại này đã được đăng ký!");
+            return "register";
+        }
+
+        // Bước 4: Kiểm tra trùng lặp Email
+        if (userService.isEmailExist(dto.getEmail())) {
+            bindingResult.rejectValue("email", "error.registerForm", "Email này đã tồn tại trong hệ thống!");
+            return "register";
+        }
+
+        // Bước 5: Thực hiện đăng ký
         try {
             userService.registerTenant(dto);
-        } catch (IllegalArgumentException e) {
-            // Username (SĐT) đã tồn tại
-            model.addAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Đã có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại!");
             return "register";
         }
 
-        // Thành công → chuyển về trang login với thông báo
         return "redirect:/login?success";
     }
 }
