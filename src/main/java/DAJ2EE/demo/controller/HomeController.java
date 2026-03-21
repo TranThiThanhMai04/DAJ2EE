@@ -13,14 +13,6 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/admin")
-    public String adminIndex(Model model) {
-        // Mock data for demo
-        model.addAttribute("fullName", "Admin A");
-        // Trả về file admin/index.html
-        return "admin/index";
-    }
-
     @GetMapping("/tenant")
     public String tenantIndex(Model model) {
         // Mock data for demo

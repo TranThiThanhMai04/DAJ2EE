@@ -17,13 +17,13 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    // ===== TRANG ĐĂNG NHẬP CƯ DÂN =====
+    
     @GetMapping("/login")
     public String userLogin() {
         return "login"; // templates/login.html
     }
 
-    // ===== TRANG ĐĂNG NHẬP ADMIN =====
+    
     @GetMapping("/admin/login")
     public String adminLogin() {
         return "admin/login"; // templates/admin/login.html

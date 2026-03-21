@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="html_head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,7 +32,7 @@
             </div>
         </div>
     </nav>
-    <nav th:fragment="admin_sidebar" id="sidebar">
+    <nav th:fragment="admin_sidebar" id="sidebar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <div class="sidebar-header">
         <h4 class="fw-bold"><i class="fas fa-user-shield me-2"></i>ADMIN PANEL</h4>
     </div>
@@ -41,7 +41,10 @@
         <li class="active">
             <a href="/admin/index"><i class="fas fa-chart-line me-2"></i>Tổng quan</a>
         </li>
-        <li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a href="/admin/permissions"><i class="fas fa-user-lock me-2"></i>Phân quyền (Mới)</a>
+        </li>
+        <li sec:authorize="hasAuthority('OP_EDIT_ROOM')">
             <a href="/admin/rooms"><i class="fas fa-door-open me-2"></i>Quản lý Phòng (Mạnh)</a>
         </li>
         <li>
@@ -50,7 +53,7 @@
         <li>
             <a href="/admin/services"><i class="fas fa-bolt me-2"></i>Điện & Nước (Mai)</a>
         </li>
-        <li>
+        <li sec:authorize="hasAuthority('OP_EDIT_INVOICE')">
             <a href="/admin/invoices"><i class="fas fa-file-invoice-dollar me-2"></i>Hóa đơn (Liễu)</a>
         </li>
         <li>
@@ -59,9 +62,24 @@
         <li>
             <a href="/admin/maintenance"><i class="fas fa-tools me-2"></i>Sửa chữa (Quân)</a>
         </li>
-        <li>
+        <li sec:authorize="hasAuthority('OP_VIEW_REPORT')">
             <a href="/admin/reports"><i class="fas fa-poll me-2"></i>Báo cáo (Liêu)</a>
         </li>
+
+        <div sec:authorize="hasRole('ADMIN')">
+            <div class="sidebar-divider my-3" style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;"></div>
+            <p class="small text-uppercase px-4 mb-2" style="color: rgba(255,255,255,0.5); font-size: 0.7rem; letter-spacing: 1px;">Hệ thống & Bảo mật</p>
+            
+            <li>
+                <a href="/admin/permissions"><i class="fas fa-key me-2"></i>Phân quyền Role</a>
+            </li>
+            <li>
+                <a href="/admin/audit-logs"><i class="fas fa-fingerprint me-2"></i>Nhật ký hệ thống</a>
+            </li>
+            <li>
+                <a href="/admin/settings"><i class="fas fa-cog me-2"></i>Cấu hình 2FA</a>
+            </li>
+        </div>
     </ul>
 </nav>
 

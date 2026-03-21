@@ -22,4 +22,14 @@ public interface UserService {
      * Kiểm tra xem email đã tồn tại trong hệ thống chưa
      */
     boolean isEmailExist(String email);
+
+    /**
+     * Cập nhật Vai trò cho người dùng (Dành cho Admin)
+     */
+    void updateUserRole(Long userId, Long roleId);
+
+    /**
+     * Cập nhật Quyền hạn cụ thể cho người dùng (Dành cho Admin)
+     */
+    void updateUserPermission(Long userId, String permissionName, boolean enabled);
 }
