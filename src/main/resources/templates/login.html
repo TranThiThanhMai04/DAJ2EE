@@ -15,6 +15,16 @@
                             <p class="text-white-50 small">Dành cho cư dân Chung cư Mini</p>
                         </div>
 
+                        <!-- Thông báo lỗi nếu đăng nhập thất bại -->
+                        <div th:if="${param.error}" class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white small text-center mb-3">
+                            Tài khoản hoặc mật khẩu không chính xác.
+                        </div>
+
+                        <!-- Thông báo đăng ký thành công -->
+                        <div th:if="${param.success}" class="alert alert-success bg-success bg-opacity-25 border-0 text-white small text-center mb-3">
+                            🎉 Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.
+                        </div>
+
                         <form th:action="@{/login}" method="post">
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-white">Số điện thoại / Email</label>
