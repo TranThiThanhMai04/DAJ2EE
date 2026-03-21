@@ -1,0 +1,57 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.3)
+
+2026-03-21T14:30:20.856+07:00  INFO 18492 --- [demo] [           main] DAJ2EE.demo.DemoApplication              : Starting DemoApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 18492 (D:\DAJ2EE-feature-ngan-auth-google\DAJ2EE-feature-ngan-auth-google\target\demo-0.0.1-SNAPSHOT.jar started by HP in D:\DAJ2EE-feature-ngan-auth-google\DAJ2EE-feature-ngan-auth-google)
+2026-03-21T14:30:20.865+07:00  INFO 18492 --- [demo] [           main] DAJ2EE.demo.DemoApplication              : No active profile set, falling back to 1 default profile: "default"
+2026-03-21T14:30:21.567+07:00  WARN 18492 --- [demo] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to process import candidates for configuration class [DAJ2EE.demo.DemoApplication]: Error processing condition on org.springframework.boot.jdbc.autoconfigure.DataSourceInitializationAutoConfiguration
+2026-03-21T14:30:21.575+07:00  INFO 18492 --- [demo] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-03-21T14:30:21.599+07:00 ERROR 18492 --- [demo] [           main] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanDefinitionStoreException: Failed to process import candidates for configuration class [DAJ2EE.demo.DemoApplication]: Error processing condition on org.springframework.boot.jdbc.autoconfigure.DataSourceInitializationAutoConfiguration
+	at org.springframework.context.annotation.ConfigurationClassParser.processImports(ConfigurationClassParser.java:644) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.annotation.ConfigurationClassParser$DeferredImportSelectorGroupingHandler.lambda$processGroupImports$0(ConfigurationClassParser.java:864) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75) ~[na:na]
+	at org.springframework.context.annotation.ConfigurationClassParser$DeferredImportSelectorGroupingHandler.processGroupImports(ConfigurationClassParser.java:860) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.annotation.ConfigurationClassParser$DeferredImportSelectorHandler.process(ConfigurationClassParser.java:831) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:200) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:446) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:310) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:349) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:118) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:795) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:603) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143) ~[spring-boot-web-server-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365) ~[spring-boot-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-4.0.3.jar!/:4.0.3]
+	at DAJ2EE.demo.DemoApplication.main(DemoApplication.java:12) ~[!/:0.0.1-SNAPSHOT]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106) ~[demo-0.0.1-SNAPSHOT.jar:0.0.1-SNAPSHOT]
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64) ~[demo-0.0.1-SNAPSHOT.jar:0.0.1-SNAPSHOT]
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40) ~[demo-0.0.1-SNAPSHOT.jar:0.0.1-SNAPSHOT]
+Caused by: java.lang.IllegalStateException: Error processing condition on org.springframework.boot.jdbc.autoconfigure.DataSourceInitializationAutoConfiguration
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:60) ~[spring-boot-autoconfigure-4.0.3.jar!/:4.0.3]
+	at org.springframework.context.annotation.ConditionEvaluator.shouldSkip(ConditionEvaluator.java:100) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClassParser.java:249) ~[spring-context-7.0.5.jar!/:7.0.5]
+	at org.springframework.context.annotation.ConfigurationClassParser.processImports(ConfigurationClassParser.java:634) ~[spring-context-7.0.5.jar!/:7.0.5]
+	... 23 common frames omitted
+Caused by: java.lang.IllegalArgumentException: No enum constant org.springframework.boot.sql.init.DatabaseInitializationMode.ALWAYSSPRING.SQL.INIT.ENCODING=UTF-8
+	at java.base/java.lang.Enum.valueOf(Enum.java:293) ~[na:na]
+	at org.springframework.boot.sql.init.DatabaseInitializationMode.valueOf(DatabaseInitializationMode.java:26) ~[spring-boot-sql-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.sql.autoconfigure.init.OnDatabaseInitializationCondition.getDatabaseInitializationMode(OnDatabaseInitializationCondition.java:78) ~[spring-boot-sql-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.sql.autoconfigure.init.OnDatabaseInitializationCondition.getMatchOutcome(OnDatabaseInitializationCondition.java:62) ~[spring-boot-sql-4.0.3.jar!/:4.0.3]
+	at org.springframework.boot.autoconfigure.condition.SpringBootCondition.matches(SpringBootCondition.java:47) ~[spring-boot-autoconfigure-4.0.3.jar!/:4.0.3]
+	... 26 common frames omitted
+

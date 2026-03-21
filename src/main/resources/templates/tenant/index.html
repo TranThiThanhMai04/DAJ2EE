@@ -47,10 +47,24 @@
                                 <i class="fas fa-bullhorn me-2 text-danger"></i>Thông báo mới
                             </div>
                             <div class="card-body">
+                                <div th:if="${#lists.isEmpty(unreadNotifs)}" class="text-center text-muted py-3">
+                                    Không có thông báo mới.
+                                </div>
                                 <ul class="list-group list-group-flush bg-transparent">
-                                    <li class="list-group-item bg-transparent">
-                                        <h6 class="fw-bold mb-1">📢 Sắp sửa chữa điện nước</h6>
-                                        <p class="small text-muted mb-0">Hệ thống tầng 2 sẽ bảo trì vào 20/03/2026.</p>
+                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center" th:each="nt : ${unreadNotifs}">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">
+                                                <span th:if="${nt.type == 'Bảo trì'}">🛠️</span>
+                                                <span th:if="${nt.type == 'Nhắc đóng tiền'}">💰</span>
+                                                <span th:if="${nt.type != 'Bảo trì' && nt.type != 'Nhắc đóng tiền'}">📢</span>
+                                                <span th:text="${nt.title}"></span>
+                                            </h6>
+                                            <p class="small text-muted mb-0" th:text="${nt.message}">Nội dung...</p>
+                                        </div>
+                                        <form th:action="@{/tenant/notifications/read}" method="post" class="m-0">
+                                            <input type="hidden" name="id" th:value="${nt.id}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Đã đọc</button>
+                                        </form>
                                     </li>
                                 </ul>
                             </div>
