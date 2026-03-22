@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}">
+    <title>Quản trị viên | Apartment Portal</title>
+</head>
+<body class="gradient-bg d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="card glass-card-login border-0 p-4 text-white shadow-lg">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-user-shield fa-4x mb-3 text-white"></i>
+                            <h3 class="fw-bold">ADMIN LOGIN</h3>
+                            <p class="small text-white-50">Hệ thống quản lý căn hộ 2026</p>
+                        </div>
+                        
+                        <!-- Thông báo lỗi nếu đăng nhập thất bại -->
+                        <div th:if="${param.error}" class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white small text-center mb-3">
+                            Tài khoản Admin hoặc mật khẩu không chính xác.
+                        </div>
+                        
+                        <form th:action="@{/login}" method="post">
+                            <div class="form-floating mb-3 text-dark">
+                                <input type="text" name="username" class="form-control border-0 bg-white bg-opacity-75" id="adminUser" placeholder="Admin ID" required>
+                                <label for="adminUser">Tài khoản Admin</label>
+                            </div>
+                            <div class="form-floating mb-4 text-dark">
+                                <input type="password" name="password" class="form-control border-0 bg-white bg-opacity-75" id="adminPass" placeholder="Mật khẩu" required>
+                                <label for="adminPass">Mật khẩu bảo mật</label>
+                            </div>
+                            <button type="submit" class="btn btn-gradient w-100 py-2 fw-bold shadow">XÁC NHẬN VÀO HỆ THỐNG</button>
+                        </form>
+                        
+                        <div class="mt-4 small text-white-50">
+                            &copy; 2026 HUTECH Software Technology
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="/" class="text-white-50 small text-decoration-none"><i class="fas fa-arrow-left me-1"></i> Quay lại trang chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
