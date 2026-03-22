@@ -26,10 +26,10 @@ public interface UserService {
     /**
      * Cập nhật Vai trò cho người dùng (Dành cho Admin)
      */
-    void updateUserRole(Long targetUserId, Long newRoleId);
+    void updateUserRole(Integer targetUserId, Integer newRoleId);
 
     /**
      * Cập nhật Quyền hạn cụ thể cho người dùng (Dành cho Admin)
      */
-    void updateUserPermission(Long userId, String permissionName, boolean enabled);
+    void updateUserPermission(Integer userId, String permissionName, boolean enabled);
 }
