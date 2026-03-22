@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}"></head>
+<body>
+    <div class="admin-wrapper">
+        <div th:replace="~{layouts/fragments :: admin_sidebar}"></div>
+
+        <div id="content">
+            <!-- Navbar top -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded-3 mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-text fw-bold text-dark">Quản lý Sự cố & Sửa chữa</span>
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted">Xin chào Admin</span>
+                        <a href="/logout" class="btn btn-outline-danger btn-sm"><i class="fas fa-power-off"></i></a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid">
+                <div th:if="${success}" class="alert alert-success mt-3" th:text="${success}"></div>
+                <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white pt-3 pb-2 border-0">
+                        <h5><i class="fas fa-hammer text-primary me-2"></i>Danh sách yêu cầu chờ xử lý / đã hoàn tất</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Mã YC</th>
+                                        <th>Phòng</th>
+                                        <th>Người gửi</th>
+                                        <th>Mô tả lỗi chính</th>
+                                        <th>Độ ưu tiên</th>
+                                        <th>Ảnh</th>
+                                        <th>Trạng thái</th>
+                                        <th>Trạng thái & Lời nhắn</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${requests == null or requests.isEmpty()}">
+                                        <td colspan="8" class="text-center text-muted py-4">Chưa có yêu cầu lỗi nào.</td>
+                                    </tr>
+                                    <tr th:each="req : ${requests}">
+                                        <td class="ps-3 fw-bold text-secondary" th:text="'#' + ${req.id}"></td>
+                                        <td th:text="${req.roomNumber}"></td>
+                                        <td th:text="${req.tenant != null ? req.tenant.fullName : 'Vô danh'}"></td>
+                                        <td>
+                                            <div class="fw-bold" th:text="${req.title}"></div>
+                                            <div class="small text-muted" th:text="${req.description}" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                                        </td>
+                                        <td>
+                                            <span th:if="${req.priority == 'HIGH'}" class="badge bg-danger">Cao</span>
+                                            <span th:if="${req.priority == 'MEDIUM'}" class="badge bg-warning text-dark">Trung bình</span>
+                                            <span th:if="${req.priority == 'LOW'}" class="badge bg-secondary">Thấp</span>
+                                        </td>
+                                        <td>
+                                            <img th:if="${req.imageUrl != null}" th:src="${req.imageUrl}" width="50" height="auto" class="rounded shadow-sm cursor-pointer border" onclick="window.open(this.src)"/>
+                                        </td>
+                                        <td>
+                                            <span th:if="${req.status == 'PENDING'}" class="badge bg-secondary">CHỜ XỬ LÝ</span>
+                                            <span th:if="${req.status == 'IN_PROGRESS'}" class="badge bg-primary">ĐANG SỬA CHỮA</span>
+                                            <span th:if="${req.status == 'COMPLETED'}" class="badge bg-success">ĐÃ XONG</span>
+                                            <span th:if="${req.status == 'REJECTED'}" class="badge bg-danger">TỪ CHỐI</span>
+                                        </td>
+                                        <td class="pe-3">
+                                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" data-bs-toggle="modal" th:attr="data-bs-target='#updateModal' + ${req.id}">
+                                                <i class="fas fa-edit me-1"></i>Mở thẻ
+                                            </button>
+
+                                            <!-- Modal Cập nhật cho Yêu cầu này -->
+                                            <div class="modal fade" th:id="'updateModal' + ${req.id}" tabindex="-1" aria-hidden="true">
+                                              <div class="modal-dialog">
+                                                <div class="modal-content border-0 shadow">
+                                                  <form th:action="@{/admin/maintenance/{id}/status(id=${req.id})}" method="post">
+                                                      <div class="modal-header bg-light">
+                                                        <h5 class="modal-title text-dark fw-bold"><i class="fas fa-cog me-2"></i>Quản lý Yêu cầu #<span th:text="${req.id}"></span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                      </div>
+                                                      <div class="modal-body p-4">
+                                                          <div class="mb-3">
+                                                              <label class="form-label fw-bold">Nội dung báo lỗi của người thuê:</label>
+                                                              <textarea class="form-control" rows="3" disabled th:text="${req.description}"></textarea>
+                                                          </div>
+                                                          <hr>
+                                                          
+                                                          <div class="mb-3">
+                                                              <label class="form-label fw-bold text-primary">Thay đổi trạng thái (luồng logic):</label>
+                                                              <!-- Giới hạn các tùy chọn chuyển tiếp dựa trên trạng thái hiện hành -->
+                                                              <select class="form-select" name="status" th:if="${req.status == 'PENDING'}">
+                                                                  <option value="PENDING" selected>CHỜ XỬ LÝ (Giữ nguyên mặc định)</option>
+                                                                  <option value="IN_PROGRESS">NGHIỆM THU - ĐANG TIẾN HÀNH SỬA</option>
+                                                                  <option value="REJECTED">TỪ CHỐI YÊU CẦU (Lý do vô lý)</option>
+                                                              </select>
+
+                                                              <select class="form-select" name="status" th:if="${req.status == 'IN_PROGRESS'}">
+                                                                  <option value="IN_PROGRESS" selected>ĐANG TIẾN HÀNH SỬA (Chưa xong chờ thợ)</option>
+                                                                  <option value="COMPLETED">ĐÃ KHẮC PHỤC THÀNH CÔNG THU TỀ</option>
+                                                              </select>
+
+                                                              <select class="form-select" name="status" th:if="${req.status == 'COMPLETED' or req.status == 'REJECTED'}">
+                                                                  <option th:value="${req.status}" selected th:text="${req.status} + ' (KHÔNG THỂ THAY ĐỔI / KẾT THÚC VÒNG ĐỜI YC)'"></option>
+                                                              </select>
+                                                          </div>
+
+                                                          <div class="mb-2" th:if="${req.status != 'COMPLETED' and req.status != 'REJECTED'}">
+                                                              <label class="form-label fw-bold">Lời nhắn/giải thích cập nhật (Thông báo cho người dân):</label>
+                                                              <textarea class="form-control" name="adminReply" rows="2" placeholder="Ghi chú thêm... Vd: Sẽ cử thợ xuống trong ngày mai" th:text="${req.adminReply}"></textarea>
+                                                          </div>
+                                                          <div class="mb-2" th:if="${req.status == 'COMPLETED' or req.status == 'REJECTED'}">
+                                                              <label class="form-label fw-bold">Lời nhắn cũ từ Admin:</label>
+                                                              <textarea class="form-control bg-light" rows="2" disabled th:text="${req.adminReply}"></textarea>
+                                                          </div>
+                                                      </div>
+                                                      <div class="modal-footer bg-light border-0">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng cửa sổ</button>
+                                                        <button type="submit" class="btn btn-success" th:if="${req.status != 'COMPLETED' and req.status != 'REJECTED'}">
+                                                            <i class="fas fa-save me-2"></i>Lưu trạng thái duyệt
+                                                        </button>
+                                                      </div>
+                                                  </form>
+                                                </div>
+                                              </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

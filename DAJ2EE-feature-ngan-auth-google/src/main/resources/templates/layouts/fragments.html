@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="html_head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Chung cư</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Local CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="../../static/css/style.css">
+</head>
+
+<body>
+    <nav th:fragment="tenant_navbar" class="navbar navbar-expand-lg navbar-dark nav-gradient sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/dashboard">
+                <i class="fas fa-building me-2"></i>APARTMENT PORTAL
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/tenant/invoices">Hóa đơn</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/tenant/maintenance">Sửa chữa</a></li>
+                </ul>
+                <div class="d-flex align-items-center text-white">
+                    <span class="me-3" th:text="${fullName}">Nguyễn Văn A</span>
+                    <a href="/logout" class="btn btn-outline-light btn-sm"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <nav th:fragment="admin_sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h4 class="fw-bold"><i class="fas fa-user-shield me-2"></i>ADMIN PANEL</h4>
+    </div>
+
+    <ul class="list-unstyled components">
+        <li class="active">
+            <a href="/admin/index"><i class="fas fa-chart-line me-2"></i>Tổng quan</a>
+        </li>
+        <li>
+            <a href="/admin/rooms"><i class="fas fa-door-open me-2"></i>Quản lý Phòng (Mạnh)</a>
+        </li>
+        <li>
+            <a href="/admin/residents"><i class="fas fa-users me-2"></i>Người thuê (Minh)</a>
+        </li>
+        <li>
+            <a href="/admin/services"><i class="fas fa-bolt me-2"></i>Điện & Nước (Mai)</a>
+        </li>
+        <li>
+            <a href="/admin/invoices"><i class="fas fa-file-invoice-dollar me-2"></i>Hóa đơn (Liễu)</a>
+        </li>
+        <li>
+            <a href="/admin/debts"><i class="fas fa-exclamation-circle me-2"></i>Công nợ (Hằng)</a>
+        </li>
+        <li>
+            <a href="/admin/maintenance"><i class="fas fa-tools me-2"></i>Sửa chữa (Quân)</a>
+        </li>
+        <li>
+            <a href="/admin/reports"><i class="fas fa-poll me-2"></i>Báo cáo (Liêu)</a>
+        </li>
+    </ul>
+</nav>
+
+<nav th:fragment="tenant_sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h4 class="fw-bold"><i class="fas fa-building me-2"></i>TENANT PORTAL</h4>
+    </div>
+
+    <ul class="list-unstyled components">
+        <li class="active">
+            <a href="/tenant"><i class="fas fa-home me-2"></i>Trang chủ</a>
+        </li>
+        <li>
+            <a href="/tenant/invoices"><i class="fas fa-file-invoice-dollar me-2"></i>Hóa đơn</a>
+        </li>
+        <li>
+            <a href="/tenant/maintenance"><i class="fas fa-tools me-2"></i>Báo cáo sự cố</a>
+        </li>
+        <li>
+            <a href="/tenant/profile"><i class="fas fa-user-circle me-2"></i>Thông tin cá nhân</a>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>
