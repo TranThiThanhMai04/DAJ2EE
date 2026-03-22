@@ -21,7 +21,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room getRoomById(Integer id) {
+    public Room getRoomById(Long id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng với ID: " + id));
     }
@@ -41,7 +41,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public Room updateRoom(Integer id, Room updatedRoom) {
+    public Room updateRoom(Long id, Room updatedRoom) {
         Room existing = getRoomById(id);
 
         String roomNumber = normalizeRoomNumber(updatedRoom.getRoomNumber());
@@ -61,7 +61,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public void deleteRoom(Integer id) {
+    public void deleteRoom(Long id) {
         Room room = getRoomById(id);
         roomRepository.delete(room);
     }

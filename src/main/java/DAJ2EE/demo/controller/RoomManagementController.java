@@ -63,7 +63,7 @@ public class RoomManagementController {
     }
 
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Integer id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model) {
         model.addAttribute("room", roomService.getRoomById(id));
         model.addAttribute("statuses", RoomStatus.values());
         model.addAttribute("formTitle", "Cập nhật phòng trọ");
@@ -73,7 +73,7 @@ public class RoomManagementController {
     }
 
     @PostMapping("/{id}/update")
-    public String updateRoom(@PathVariable Integer id,
+    public String updateRoom(@PathVariable Long id,
             @Valid @ModelAttribute("room") Room room,
             BindingResult bindingResult,
             Model model,
@@ -96,7 +96,7 @@ public class RoomManagementController {
 
     @PostMapping("/{id}/delete")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('OP_DELETE_ROOM')")
-    public String deleteRoom(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteRoom(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         roomService.deleteRoom(id);
         redirectAttributes.addFlashAttribute("successMessage", "Đã xóa phòng thành công");
         return "redirect:/admin/rooms";

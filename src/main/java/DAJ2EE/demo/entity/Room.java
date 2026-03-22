@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "Mã phòng không được để trống")
     @Column(name = "room_number", nullable = false, length = 10, unique = true)
