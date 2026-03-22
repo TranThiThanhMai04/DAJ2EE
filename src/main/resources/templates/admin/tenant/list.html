@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}"></head>
+<body>
+    <div class="admin-wrapper d-flex">
+        <div th:replace="~{layouts/fragments :: admin_sidebar}"></div>
+        <div id="content" class="flex-grow-1 p-4">
+            <h2 class="mb-4">Danh sách Người Thuê</h2>
+            
+            <div th:if="${successMessage}" class="alert alert-success">
+                <span th:text="${successMessage}"></span>
+            </div>
+            
+            <a href="/admin/tenants/add" class="btn btn-primary mb-3">Thêm Người Thuê Mới</a>
+            
+            <table class="table table-bordered table-striped glass-card">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ Tên</th>
+                        <th>CCCD</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="tenant : ${tenants}">
+                        <td th:text="${tenant.id}"></td>
+                        <td th:text="${tenant.fullName}"></td>
+                        <td th:text="${tenant.cccd}"></td>
+                        <td th:text="${tenant.phoneNumber}"></td>
+                        <td th:text="${tenant.email}"></td>
+                        <td>
+                            <a th:href="@{/admin/tenants/edit/{id}(id=${tenant.id})}" class="btn btn-sm btn-warning">Sửa</a>
+                            <a th:href="@{/admin/tenants/delete/{id}(id=${tenant.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Xóa người thuê này?');">Xóa</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

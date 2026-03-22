@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}"></head>
+<body>
+    <div class="admin-wrapper d-flex">
+        <div th:replace="~{layouts/fragments :: admin_sidebar}"></div>
+        <div id="content" class="flex-grow-1 p-4">
+            <h2 class="mb-4">Danh sách Phòng</h2>
+            
+            <div th:if="${successMessage}" class="alert alert-success">
+                <span th:text="${successMessage}"></span>
+            </div>
+            
+            <a href="/admin/rooms/add" class="btn btn-primary mb-3">Thêm Phòng Mới</a>
+            
+            <table class="table table-bordered table-striped glass-card">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Số Phòng</th>
+                        <th>Giá (VND)</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="room : ${rooms}">
+                        <td th:text="${room.id}"></td>
+                        <td th:text="${room.roomNumber}"></td>
+                        <td th:text="${room.price}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${room.status == 'Available' ? 'bg-success' : (room.status == 'Rented' ? 'bg-danger' : 'bg-warning')}" th:text="${room.status}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-sm btn-warning">Sửa</a>
+                            <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa phòng này không?');">Xóa</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
