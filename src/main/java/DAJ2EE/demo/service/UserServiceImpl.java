@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateUserRole(Integer targetUserId, Integer newRoleId) {
+    public void updateUserRole(Long targetUserId, Long newRoleId) {
         // 1. Kiểm tra tồn tại của User mục tiêu
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + targetUserId));
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateUserPermission(Integer userId, String permissionName, boolean enabled) {
+    public void updateUserPermission(Long userId, String permissionName, boolean enabled) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + userId));
 

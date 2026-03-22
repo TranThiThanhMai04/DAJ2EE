@@ -7,11 +7,11 @@ import java.util.List;
 public interface RoomService {
     List<Room> getAllRooms();
 
-    Room getRoomById(Integer id);
+    Room getRoomById(Long id);
 
     Room createRoom(Room room);
 
-    Room updateRoom(Integer id, Room room);
+    Room updateRoom(Long id, Room room);
 
-    void deleteRoom(Integer id);
+    void deleteRoom(Long id);
 }
