@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
         // Tạo đối tượng User mới
         User user = new User();
-        user.setUsername(dto.getPhone());     // SĐT làm username
+        user.setUsername(dto.getPhone()); // SĐT làm username
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
         user.setCccd(dto.getCccd());
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateUserRole(Long targetUserId, Long newRoleId) {
+    public void updateUserRole(Integer targetUserId, Integer newRoleId) {
         // 1. Kiểm tra tồn tại của User mục tiêu
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + targetUserId));
@@ -115,10 +115,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateUserPermission(Long userId, String permissionName, boolean enabled) {
+    public void updateUserPermission(Integer userId, String permissionName, boolean enabled) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + userId));
-        
+
         Permission permission = permissionRepository.findByName(permissionName)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Quyền hạn: " + permissionName));
 

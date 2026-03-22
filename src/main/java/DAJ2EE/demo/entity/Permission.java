@@ -12,7 +12,7 @@ import lombok.*;
 public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(unique = true, nullable = false)
     private String name; // e.g., OP_EDIT_ROOM, OP_VIEW_REPORT

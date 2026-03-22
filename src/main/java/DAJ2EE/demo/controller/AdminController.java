@@ -43,7 +43,8 @@ public class AdminController {
      * Xử lý cập nhật vai trò người dùng qua Form truyền thống.
      */
     @PostMapping("/permissions/update-role")
-    public String updateRole(@RequestParam Long userId, @RequestParam Long roleId, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String updateRole(@RequestParam Integer userId, @RequestParam Integer roleId,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
             userService.updateUserRole(userId, roleId);
             return "redirect:/admin/permissions?success";
@@ -60,7 +61,7 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> updatePermission(@RequestBody Map<String, Object> payload) {
         try {
-            Long userId = Long.valueOf(payload.get("userId").toString());
+            Integer userId = Integer.valueOf(payload.get("userId").toString());
             String permissionName = payload.get("permissionName").toString();
             boolean enabled = (boolean) payload.get("enabled");
 
@@ -85,10 +86,9 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<?> updateRoleAjax(@RequestBody Map<String, Object> payload) {
         try {
-            Long userId = Long.valueOf(payload.get("userId").toString());
-            Long roleId = Long.valueOf(payload.get("roleId").toString());
+            Integer userId = Integer.valueOf(payload.get("userId").toString());
+            Integer roleId = Integer.valueOf(payload.get("roleId").toString());
 
-           
             userService.updateUserRole(userId, roleId);
 
             Map<String, String> response = new HashMap<>();
