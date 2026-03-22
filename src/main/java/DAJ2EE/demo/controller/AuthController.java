@@ -70,11 +70,12 @@ public class AuthController {
         // Bước 5: Thực hiện đăng ký
         try {
             userService.registerTenant(dto);
+            model.addAttribute("successMessage", "Đăng ký thành công! Vui lòng chờ Ban Quản Lý phê duyệt tài khoản.");
+            model.addAttribute("registerForm", new UserRegistrationDto()); // Reset form
+            return "register";
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Đã có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại!");
             return "register";
         }
-
-        return "redirect:/login?success";
     }
 }

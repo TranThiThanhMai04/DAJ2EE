@@ -9,7 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import DAJ2EE.demo.entity.User;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +36,8 @@ public class AdminController {
      */
     @GetMapping("/permissions")
     public String showPermissionsManagement(Model model) {
-        model.addAttribute("users", userRepository.findAll());
+        // Chỉ hiển thị user đã được Admin phê duyệt (enabled = true)
+        model.addAttribute("users", userRepository.findByEnabledTrue());
         model.addAttribute("fullName", "Admin Panel");
         return "admin/permissions";
     }
@@ -101,6 +104,83 @@ public class AdminController {
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
+    }
+
+    /**
+     * API: Lấy danh sách các User đang chờ duyệt (enabled = false)
+     */
+    @GetMapping("/api/users/pending")
+    @ResponseBody
+    public ResponseEntity<?> getPendingUsers() {
+        try {
+            List<User> pendingUsers = userRepository.findByEnabledFalse();
+            return ResponseEntity.ok(pendingUsers);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    /**
+     * API: Quản trị viên phê duyệt người dùng
+     */
+    @PostMapping("/api/users/approve/{id}")
+    @ResponseBody
+    public ResponseEntity<?> approveUser(@PathVariable("id") Long id) {
+        try {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id));
+            
+            user.setEnabled(true);
+            userRepository.save(user);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Đã phê duyệt tài khoản thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    /**
+     * API: Quản trị viên từ chối và xóa người dùng
+     */
+    @DeleteMapping("/api/users/reject/{id}")
+    @ResponseBody
+    public ResponseEntity<?> rejectUser(@PathVariable("id") Long id) {
+        try {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id));
+            
+            userRepository.delete(user);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Đã từ chối và xóa tài khoản thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    /**
+     * Trang Quản lý phê duyệt cư dân.
+     */
+    @GetMapping("/pending-approvals")
+    public String showPendingApprovals(Model model) {
+        List<User> pendingUsers = userRepository.findByEnabledFalse();
+        model.addAttribute("pendingUsers", pendingUsers);
+        model.addAttribute("fullName", "Admin Panel");
+        return "admin/pending-approvals";
     }
 
     /**

@@ -20,9 +20,10 @@
                             <span th:text="${errorMessage}"></span>
                         </div>
 
-                        <!-- Hiện thông báo đăng ký thành công (khi redirect từ trang khác về) -->
-                        <!-- (Không dùng ở đây vì trang này là form – success redirect đến /login?success) -->
-
+                        <!-- Hiện thông báo đăng ký thành công (khi chờ duyệt) -->
+                        <div th:if="${successMessage}" class="alert alert-success bg-success bg-opacity-25 border-0 text-white small text-center mb-3">
+                            <span th:text="${successMessage}"></span>
+                        </div>
                         <!--
                             th:object="${registerForm}" → gắn DTO vào form
                             th:field="*{phone}" → tự điền name="phone", id="phone", value từ DTO

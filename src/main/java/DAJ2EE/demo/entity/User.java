@@ -39,4 +39,5 @@ public class User {
     private Set<Permission> permissions = new HashSet<>();
 
     private int status;
+    private boolean enabled = false;
 }

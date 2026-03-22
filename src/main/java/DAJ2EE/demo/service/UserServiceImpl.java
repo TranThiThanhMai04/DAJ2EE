@@ -58,6 +58,7 @@ public class UserServiceImpl implements UserService {
         }
         user.setRole(tenantRole);
         user.setStatus(1); // 1 = Active (đang hoạt động)
+        user.setEnabled(false); // Chưa kiểm duyệt, không thể đăng nhập
 
         userRepository.save(user);
     }

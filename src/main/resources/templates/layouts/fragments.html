@@ -44,6 +44,9 @@
         <li sec:authorize="hasRole('ADMIN')">
             <a href="/admin/permissions"><i class="fas fa-user-lock me-2"></i>Phân quyền (Mới)</a>
         </li>
+        <li>
+            <a href="/admin/pending-approvals"><i class="fas fa-user-clock me-2"></i>Phê duyệt cư dân</a>   
+        </li>
         <li sec:authorize="hasAuthority('OP_EDIT_ROOM')">
             <a href="/admin/rooms"><i class="fas fa-door-open me-2"></i>Quản lý Phòng (Mạnh)</a>
         </li>

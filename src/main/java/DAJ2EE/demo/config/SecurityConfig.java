@@ -87,10 +87,12 @@ public class SecurityConfig {
     public AuthenticationFailureHandler customAuthenticationFailureHandler() {
         return (request, response, exception) -> {
             String referer = request.getHeader("Referer");
+            boolean isDisabled = exception instanceof org.springframework.security.authentication.DisabledException;
+            
             if (referer != null && referer.contains("/admin/login")) {
-                response.sendRedirect("/admin/login?error");
+                response.sendRedirect("/admin/login?" + (isDisabled ? "disabled" : "error"));
             } else {
-                response.sendRedirect("/login?error");
+                response.sendRedirect("/login?" + (isDisabled ? "disabled" : "error"));
             }
         };
     }

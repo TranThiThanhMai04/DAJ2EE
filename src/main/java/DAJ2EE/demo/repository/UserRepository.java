@@ -4,6 +4,8 @@ import DAJ2EE.demo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
+import java.util.List;
+
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
@@ -16,4 +18,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Đếm số lượng người dùng theo tên Vai trò và trạng thái (Active = 1)
     long countByRoleNameAndStatus(String roleName, int status);
+
+    // Lấy danh sách người dùng chưa được duyệt (enabled = false)
+    List<User> findByEnabledFalse();
+
+    // Lấy danh sách người dùng đã được duyệt (enabled = true)
+    List<User> findByEnabledTrue();
 }
