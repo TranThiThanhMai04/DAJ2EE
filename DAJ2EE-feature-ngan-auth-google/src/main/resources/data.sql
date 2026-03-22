@@ -1,8 +1,0 @@
--- -- Tạo các vai trò trước
--- INSERT INTO roles (id, name) VALUES (1, 'ROLE_ADMIN');
--- INSERT INTO roles (id, name) VALUES (2, 'ROLE_TENANT');
--- 
--- -- Tạo tài khoản Admin Ngân
--- -- Mật khẩu bên dưới là '123456' đã được mã hóa BCrypt chuẩn
--- INSERT INTO users (id, username, password, full_name, email, role_id, status) 
--- VALUES (1, 'admin', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqCYAd1up5fLndN7YFvX.A5hVn6G', 'Phạm Thị Ái Ngân', 'ngan.admin@gmail.com', 1, 1);
