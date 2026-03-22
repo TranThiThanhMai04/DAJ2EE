@@ -28,6 +28,7 @@ public class AdminController {
 
     /**
      * Hiển thị trang Quản lý Phân quyền.
+     * 
      * @param model Đối tượng chứa dữ liệu truyền xuống View.
      * @return Template admin/permissions.html
      */
@@ -42,9 +43,14 @@ public class AdminController {
      * Xử lý cập nhật vai trò người dùng qua Form truyền thống.
      */
     @PostMapping("/permissions/update-role")
-    public String updateRole(@RequestParam Long userId, @RequestParam Long roleId) {
-        userService.updateUserRole(userId, roleId);
-        return "redirect:/admin/permissions?success";
+    public String updateRole(@RequestParam Long userId, @RequestParam Long roleId, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            userService.updateUserRole(userId, roleId);
+            return "redirect:/admin/permissions?success";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/permissions?error";
+        }
     }
 
     /**
@@ -73,9 +79,34 @@ public class AdminController {
     }
 
     /**
+     * API cập nhật Vai trò (Role) qua AJAX.
+     */
+    @PostMapping("/api/permissions/update-role")
+    @ResponseBody
+    public ResponseEntity<?> updateRoleAjax(@RequestBody Map<String, Object> payload) {
+        try {
+            Long userId = Long.valueOf(payload.get("userId").toString());
+            Long roleId = Long.valueOf(payload.get("roleId").toString());
+
+           
+            userService.updateUserRole(userId, roleId);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Cập nhật vai trò thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    /**
      * Trang Dashboard chính của Admin.
      */
-    @GetMapping({"", "/", "/index"})
+    @GetMapping({ "", "/", "/index" })
     public String adminIndex(Model model) {
         model.addAttribute("fullName", "Admin Panel");
         return "admin/index";

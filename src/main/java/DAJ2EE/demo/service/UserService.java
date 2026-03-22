@@ -26,7 +26,7 @@ public interface UserService {
     /**
      * Cập nhật Vai trò cho người dùng (Dành cho Admin)
      */
-    void updateUserRole(Long userId, Long roleId);
+    void updateUserRole(Long targetUserId, Long newRoleId);
 
     /**
      * Cập nhật Quyền hạn cụ thể cho người dùng (Dành cho Admin)
