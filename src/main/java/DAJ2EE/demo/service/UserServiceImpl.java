@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalStateException("Không tìm thấy ROLE_TENANT trong hệ thống!");
         }
         user.setRole(tenantRole);
-        user.setStatus(1); // 1 = Active (đang hoạt động)
+        user.setStatus(1); // Mặc định Hoạt động
 
         userRepository.save(user);
     }
@@ -68,6 +68,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isUsernameExist(String username) {
         return userRepository.findByUsername(username).isPresent();
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public void approveTenant(Long id) {
+        User user = getTenantById(id);
+        if (user.getStatus() == 1) {
+            throw new IllegalArgumentException("Khách thuê này đã được phê duyệt hợp lệ từ trước!");
+        }
+        user.setStatus(1);
+        userRepository.save(user);
     }
 
     /**
@@ -133,5 +145,65 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isEmailExist(String email) {
         return userRepository.findByEmail(email).isPresent();
+    }
+
+    @Override
+    public java.util.List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public java.util.List<User> getAllTenants() {
+        return userRepository.findByRoleName("ROLE_TENANT");
+    }
+
+    @Override
+    public User getTenantById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách thuê với ID: " + id));
+        if (!"ROLE_TENANT".equals(user.getRole().getName())) {
+            throw new IllegalArgumentException("Người dùng này không phải là khách thuê");
+        }
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public void updateTenant(Long id, DAJ2EE.demo.dto.TenantRequestDto dto) {
+        User user = getTenantById(id);
+        
+        // Kiểm tra xem SĐT mới có bị trùng với người khác không
+        if (!user.getUsername().equals(dto.getPhone()) && isUsernameExist(dto.getPhone())) {
+            throw new IllegalArgumentException("Số điện thoại này đã được đăng ký cho người khác");
+        }
+        
+        user.setUsername(dto.getPhone());
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setCccd(dto.getCccd());
+        
+        if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+            if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+                throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+            }
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        userRepository.save(user);
+    }
+
+    @Autowired
+    private DAJ2EE.demo.repository.ContractRepository contractRepository;
+
+    @Override
+    @Transactional
+    public void deleteTenant(Long id) {
+        User user = getTenantById(id);
+        java.util.List<DAJ2EE.demo.entity.Contract> activeContracts = contractRepository.findByTenantIdAndStatusIn(id, java.util.Arrays.asList(DAJ2EE.demo.entity.ContractStatus.ACTIVE, DAJ2EE.demo.entity.ContractStatus.PENDING));
+        if (activeContracts != null && !activeContracts.isEmpty()) {
+            throw new IllegalArgumentException("Không thể xóa khách thuê đang có hợp đồng có hiệu lực hoặc đang chờ xác nhận");
+        }
+        // Xóa tenant
+        userRepository.delete(user);
     }
 }
