@@ -22,6 +22,7 @@ public interface UserService {
      * Kiểm tra xem username (SĐT) đã tồn tại trong hệ thống chưa
      */
     boolean isUsernameExist(String username);
+    java.util.Optional<DAJ2EE.demo.entity.User> findByUsername(String username);
 
     /**
      * Kiểm tra xem email đã tồn tại trong hệ thống chưa
