@@ -12,6 +12,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Tìm kiếm bằng username (SĐT) HOẶC email để hỗ trợ đăng nhập linh hoạt
     Optional<User> findByUsernameOrEmail(String username, String email);
 
+    // Lấy danh sách toàn bộ người dùng thuộc 1 vai trò nhất định
+    java.util.List<User> findByRoleName(String roleName);
+
     // Đếm số lượng người dùng theo tên Vai trò
     long countByRoleName(String roleName);
 

@@ -16,14 +16,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String username;
     private String password;
 
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+    @Column(name = "hometown")
+    private String hometown;
+
+    @Column(unique = true)
     private String email;
 
+    @Column(unique = true)
     private String cccd; // Số căn cước công dân
 
     @ManyToOne(fetch = FetchType.EAGER)

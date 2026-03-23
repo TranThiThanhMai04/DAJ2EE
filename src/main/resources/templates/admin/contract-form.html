@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}">
+    <meta charset="UTF-8">
+    <title>Tạo Hợp đồng</title>
+</head>
+<body>
+<div class="admin-wrapper">
+    <div th:replace="~{layouts/fragments :: admin_sidebar}"></div>
+
+    <div id="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded-3 mb-4">
+            <div class="container-fluid">
+                <span class="navbar-text fw-bold text-dark">Tạo Hợp đồng Mới</span>
+            </div>
+        </nav>
+
+        <div class="card glass-card border-0 shadow-sm mx-auto" style="max-width: 800px;">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold mb-0">Thông tin Hợp đồng</h5>
+                <p class="text-muted small">Điền các thông tin cần thiết để tạo hợp đồng thuê phòng</p>
+            </div>
+            <div class="card-body">
+                
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                
+                <form th:action="@{/admin/contracts/create}" th:object="${contractDto}" method="post">
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Chọn Phòng</label>
+                            <select class="form-select" th:field="*{roomId}" id="roomId" required>
+                                <option value="" disabled selected>-- Chọn một phòng trống --</option>
+                                <option th:each="room : ${rooms}" 
+                                        th:value="${room.id}" 
+                                        th:data-price="${room.monthlyRent}"
+                                        th:text="${room.roomNumber} + ' - ' + ${#numbers.formatDecimal(room.monthlyRent, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'"></option>
+                            </select>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('roomId')}" th:errors="*{roomId}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Chọn Người thuê</label>
+                            <select class="form-select" th:field="*{tenantId}" id="tenantId" required>
+                                <option value="" disabled selected>-- Chọn một khách thuê --</option>
+                                <option th:each="t : ${tenants}" 
+                                        th:value="${t.id}" 
+                                        th:data-fullname="${t.fullName}"
+                                        th:data-hometown="${t.hometown}"
+                                        th:data-gender="${t.gender}"
+                                        th:text="${t.username} + (${t.fullName != null} ? ' - ' + ${t.fullName} : '')"></option>
+                            </select>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('tenantId')}" th:errors="*{tenantId}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Họ & Tên in Hợp đồng (Theo CCCD)</label>
+                            <input type="text" class="form-control" th:field="*{tenantFullName}" id="tenantFullName" required />
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('tenantFullName')}" th:errors="*{tenantFullName}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Giới tính</label>
+                            <select class="form-select" th:field="*{tenantGender}" id="tenantGender" required>
+                                <option value="" disabled selected>-- Chọn --</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('tenantGender')}" th:errors="*{tenantGender}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Quê quán</label>
+                            <input type="text" class="form-control" th:field="*{tenantHometown}" id="tenantHometown" required />
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('tenantHometown')}" th:errors="*{tenantHometown}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ngày bắt đầu</label>
+                            <input type="date" class="form-control" th:field="*{startDate}" required />
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ngày kết thúc</label>
+                            <input type="date" class="form-control" th:field="*{endDate}" required />
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Tiền cọc (VNĐ)</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{deposit}" required />
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('deposit')}" th:errors="*{deposit}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Giá thuê hàng tháng (VNĐ) <span class="text-muted fw-normal">(Có thể sửa theo thỏa thuận)</span></label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{monthlyRent}" id="monthlyRent" required />
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('monthlyRent')}" th:errors="*{monthlyRent}"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="/admin/contracts" class="btn btn-light border">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-gradient px-4">Lưu hợp đồng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomSelect = document.getElementById('roomId');
+        const monthlyRentInput = document.getElementById('monthlyRent');
+        const tenantSelect = document.getElementById('tenantId');
+        const tenantFullName = document.getElementById('tenantFullName');
+        const tenantGender = document.getElementById('tenantGender');
+        const tenantHometown = document.getElementById('tenantHometown');
+        
+        // Auto-fill form initially if a room is already selected
+        if(roomSelect.selectedIndex > 0 && !monthlyRentInput.value) {
+            const price = roomSelect.options[roomSelect.selectedIndex].getAttribute('data-price');
+            if (price) {
+                monthlyRentInput.value = price;
+            }
+        }
+
+        roomSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            if (price) {
+                monthlyRentInput.value = price;
+            }
+        });
+
+        tenantSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            tenantFullName.value = selectedOption.getAttribute('data-fullname') || '';
+            tenantHometown.value = selectedOption.getAttribute('data-hometown') || '';
+            
+            const gender = selectedOption.getAttribute('data-gender');
+            if (gender) {
+                tenantGender.value = gender;
+            } else {
+                tenantGender.selectedIndex = 0;
+            }
+        });
+    });
+</script>
+</body>
+</html>
