@@ -124,21 +124,42 @@ public class AdminController {
     }
 
     /**
-     * API: Quản trị viên phê duyệt người dùng
+     * API: Quản trị viên phê duyệt người dùng.
+     * Nhận CCCD và cập nhật thông tin người dùng.
      */
     @PostMapping("/api/users/approve/{id}")
     @ResponseBody
-    public ResponseEntity<?> approveUser(@PathVariable("id") Long id) {
+    public ResponseEntity<?> approveUser(@PathVariable("id") Long id, @RequestBody Map<String, String> payload) {
         try {
+            String cccd = payload.get("cccd");
+            String gender = payload.get("gender");
+            String hometown = payload.get("hometown");
+
+            if (cccd == null || !cccd.matches("\\d{12}")) {
+                throw new IllegalArgumentException("CCCD không hợp lệ. Phải bao gồm đúng 12 chữ số.");
+            }
+            if (gender == null || gender.isEmpty()) {
+                throw new IllegalArgumentException("Giới tính không được để trống.");
+            }
+            if (hometown == null || hometown.isEmpty()) {
+                throw new IllegalArgumentException("Quê quán không được để trống.");
+            }
+
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id));
             
+            // Cập nhật thông tin và phê duyệt
+            user.setCccd(cccd);
+            user.setGender(gender);
+            user.setHometown(hometown);
             user.setEnabled(true);
+            user.setStatus(1); // 1 = Active
+            
             userRepository.save(user);
 
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
-            response.put("message", "Đã phê duyệt tài khoản thành công!");
+            response.put("message", "Đã phê duyệt tài khoản và cập nhật hồ sơ cư dân thành công!");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();

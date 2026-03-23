@@ -1,6 +1,8 @@
 package DAJ2EE.demo.service;
 
 import DAJ2EE.demo.dto.UserRegistrationDto;
+import DAJ2EE.demo.dto.ProfileUpdateDto;
+import DAJ2EE.demo.dto.ChangePasswordDto;
 import DAJ2EE.demo.entity.Permission;
 import DAJ2EE.demo.entity.Role;
 import DAJ2EE.demo.entity.User;
@@ -134,5 +136,50 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isEmailExist(String email) {
         return userRepository.findByEmail(email).isPresent();
+    }
+
+    /**
+     * Cập nhật hồ sơ cá nhân (chỉ cho phép đổi Họ tên).
+     * @param currentUsername Username (SĐT) của người dùng đang đăng nhập.
+     * @param dto DTO chỉ chứa thông tin `fullName`.
+     */
+    @Override
+    @Transactional
+    public void updateProfile(String currentUsername, ProfileUpdateDto dto) {
+        // 1. Lấy User từ database thông qua currentUsername
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + currentUsername));
+
+        // 2. Chỉ cập nhật Họ và tên
+        user.setFullName(dto.getFullName());
+
+        // 3. Lưu lại thay đổi
+        userRepository.save(user);
+    }
+
+    /**
+     * Đổi mật khẩu cho người dùng hiện tại.
+     * Kiểm tra mật khẩu cũ và khớp mật khẩu mới.
+     */
+    @Override
+    @Transactional
+    public void changePassword(String currentUsername, ChangePasswordDto dto) {
+        // 1. Lấy User
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + currentUsername));
+
+        // 2. Kiểm tra mật khẩu cũ (BCrypt match)
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác!");
+        }
+
+        // 3. Kiểm tra mật khẩu mới và xác nhận mật khẩu khớp nhau (Backend double check)
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới và xác nhận mật khẩu không khớp!");
+        }
+
+        // 4. Mã hóa và lưu mật khẩu mới
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
     }
 }

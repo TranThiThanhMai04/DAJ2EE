@@ -26,6 +26,10 @@ public class User {
 
     private String cccd; // Số căn cước công dân
 
+    private String gender; // Giới tính (MALE, FEMALE)
+
+    private String hometown; // Quê quán (Tên tỉnh thành)
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;

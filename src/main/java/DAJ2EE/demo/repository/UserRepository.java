@@ -10,7 +10,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     
-    // Tìm kiếm bằng username (SĐT) HOẶC email để hỗ trợ đăng nhập linh hoạt
+    // Tìm kiếm bằng username (SĐT) HOẶC email để hỗ trợ đăng nhập linh hoạt.
+    // Tuyệt đối không tìm kiếm theo fullName vì không có tính duy nhất.
     Optional<User> findByUsernameOrEmail(String username, String email);
 
     // Đếm số lượng người dùng theo tên Vai trò
@@ -24,4 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Lấy danh sách người dùng đã được duyệt (enabled = true)
     List<User> findByEnabledTrue();
+
+    // Kiểm tra xem username (SĐT) đã tồn tại cho người dùng khác hay chưa
+    boolean existsByUsernameAndIdNot(String username, Long id);
 }

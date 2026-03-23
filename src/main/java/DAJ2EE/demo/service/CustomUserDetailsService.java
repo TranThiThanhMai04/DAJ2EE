@@ -21,9 +21,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
-        // Tìm kiếm theo username (SĐT) hoặc email
+        // CHỈ cho phép đăng nhập bằng Số điện thoại (username) hoặc Email.
+        // Tuyệt đối không tìm theo fullName vì Tên không có tính duy nhất.
         User user = userRepository.findByUsernameOrEmail(input, input)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với: " + input));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với SĐT hoặc Email: " + input));
 
         // Nạp tất cả quyền hạn (Role + Permissions) vào danh sách Authorities
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();

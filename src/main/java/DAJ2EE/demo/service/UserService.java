@@ -1,6 +1,8 @@
 package DAJ2EE.demo.service;
 
 import DAJ2EE.demo.dto.UserRegistrationDto;
+import DAJ2EE.demo.dto.ProfileUpdateDto;
+import DAJ2EE.demo.dto.ChangePasswordDto;
 
 /**
  * Interface định nghĩa các hành động liên quan tới User
@@ -32,4 +34,14 @@ public interface UserService {
      * Cập nhật Quyền hạn cụ thể cho người dùng (Dành cho Admin)
      */
     void updateUserPermission(Long userId, String permissionName, boolean enabled);
+
+    /**
+     * Cập nhật hồ sơ cá nhân cho người dùng hiện tại
+     */
+    void updateProfile(String currentUsername, ProfileUpdateDto dto);
+
+    /**
+     * Đổi mật khẩu cho người dùng hiện tại
+     */
+    void changePassword(String currentUsername, ChangePasswordDto dto);
 }

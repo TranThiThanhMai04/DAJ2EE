@@ -5,12 +5,12 @@
     <th:block th:replace="~{layouts/fragments :: html_head}"></th:block>
     <title>Phê duyệt cư dân | Quản trị hiện đại</title>
     
-    <!-- Gọi thêm CDN riêng cho trang này -->
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="../../static/css/pending.css">
     <!-- Cấu hình bảo mật CSRF -->
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
@@ -123,54 +123,137 @@
 <script th:inline="javascript">
     function handleAction(userId, action) {
         const isApprove = action === 'approve';
-        const titleText = isApprove ? 'Duyệt tài khoản?' : 'Từ chối tài khoản?';
-        const textMsg = isApprove 
-            ? 'Cư dân này sẽ được cấp quyền đăng nhập vào hệ thống.' 
-            : 'Tài khoản này sẽ bị xóa khỏi hệ thống vĩnh viễn.';
-        const confirmColor = isApprove ? '#10b981' : '#ef4444';
-        const url = isApprove ? `/admin/api/users/approve/${userId}` : `/admin/api/users/reject/${userId}`;
-        const method = isApprove ? 'POST' : 'DELETE';
+        
+        if (isApprove) {
+            // Trường hợp PHÊ DUYỆT: Hiện Modal tùy chỉnh HTML
+            Swal.fire({
+                title: 'Hoàn tất hồ sơ cư dân',
+                html: `
+                    <div class="text-left">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Số CCCD (12 chữ số)</label>
+                            <input id="swal-cccd" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none" maxlength="12" placeholder="Nhập 12 chữ số...">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Giới tính</label>
+                            <div class="flex gap-4 mt-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="swal-gender" value="MALE" checked class="mr-2 accent-emerald-500"> Nam
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="swal-gender" value="FEMALE" class="mr-2 accent-emerald-500"> Nữ
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Quê quán (Tỉnh/Thành phố)</label>
+                            <select id="swal-hometown" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <option value="">Đang tải danh sách...</option>
+                            </select>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Xác nhận Duyệt',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#10b981',
+                customClass: { popup: 'swal-dark' },
+                didOpen: () => {
+                    // Fetch tỉnh thành khi modal mở
+                    const provinceSelect = document.getElementById('swal-hometown');
+                    fetch('https://provinces.open-api.vn/api/p/')
+                        .then(res => res.json())
+                        .then(provinces => {
+                            provinceSelect.innerHTML = '<option value="">-- Chọn Tỉnh/Thành phố --</option>';
+                            provinces.forEach(p => {
+                                const option = document.createElement('option');
+                                option.value = p.name;
+                                option.textContent = p.name;
+                                provinceSelect.appendChild(option);
+                            });
+                        })
+                        .catch(err => {
+                            provinceSelect.innerHTML = '<option value="">Lỗi tải dữ liệu!</option>';
+                            console.error('Fetch error:', err);
+                        });
+                },
+                preConfirm: () => {
+                    const cccd = document.getElementById('swal-cccd').value;
+                    const gender = document.querySelector('input[name="swal-gender"]:checked').value;
+                    const hometown = document.getElementById('swal-hometown').value;
 
-        // SweetAlert2 Popup
-        Swal.fire({
-            title: titleText,
-            text: textMsg,
-            icon: isApprove ? 'question' : 'warning',
-            showCancelButton: true,
-            confirmButtonColor: confirmColor,
-            cancelButtonColor: '#475569',
-            confirmButtonText: 'Đồng ý',
-            cancelButtonText: 'Hủy',
-            customClass: { popup: 'swal-dark' } // Áp dụng Dark mode
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch API
-                const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
-                const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-
-                fetch(url, {
-                    method: method,
-                    headers: { [header]: token }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            title: 'Thành công!',
-                            text: data.message,
-                            icon: 'success',
-                            customClass: { popup: 'swal-dark' },
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => location.reload()); // Reload trang sau khi xong
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
+                    if (!cccd || !/^\d{12}$/.test(cccd)) {
+                        Swal.showValidationMessage('CCCD phải bao gồm đúng 12 chữ số!');
+                        return false;
                     }
-                })
-                .catch(error => {
-                    Swal.fire('Lỗi kết nối!', 'Không thể xử lý yêu cầu.', 'error');
-                });
+                    if (!hometown) {
+                        Swal.showValidationMessage('Vui lòng chọn Quê quán!');
+                        return false;
+                    }
+
+                    return { cccd, gender, hometown };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeApiCall(`/admin/api/users/approve/${userId}`, 'POST', result.value);
+                }
+            });
+        } else {
+            // Trường hợp TỪ CHỐI: Hiện cảnh báo xóa
+            Swal.fire({
+                title: 'Từ chối tài khoản?',
+                text: 'Tài khoản này sẽ bị xóa khỏi hệ thống vĩnh viễn.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#475569',
+                confirmButtonText: 'Đồng ý xóa',
+                cancelButtonText: 'Hủy',
+                customClass: { popup: 'swal-dark' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeApiCall(`/admin/api/users/reject/${userId}`, 'DELETE', null);
+                }
+            });
+        }
+    }
+
+    // Hàm phụ trợ để gọi API và hiển thị kết quả
+    function executeApiCall(url, method, bodyData) {
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+        const options = {
+            method: method,
+            headers: { 
+                [header]: token,
+                'Content-Type': 'application/json'
             }
+        };
+        
+        if (bodyData) {
+            options.body = JSON.stringify(bodyData);
+        }
+
+        fetch(url, options)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    title: 'Thành công!',
+                    text: data.message,
+                    icon: 'success',
+                    customClass: { popup: 'swal-dark' },
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => location.reload());
+            } else {
+                Swal.fire('Lỗi!', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Lỗi kết nối!', 'Không thể xử lý yêu cầu.', 'error');
         });
     }
 </script>
