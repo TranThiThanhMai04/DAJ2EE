@@ -28,3 +28,10 @@ ON DUPLICATE KEY UPDATE
     email = VALUES(email),
     role_id = VALUES(role_id),
     status = VALUES(status);
+
+-- Fix data type formatting errors in invoices month due to older varchar structure "MM/YYYY"
+UPDATE invoices 
+SET 
+    year = CAST(SUBSTRING_INDEX(CAST(month AS CHAR), '/', -1) AS UNSIGNED),
+    month = CAST(SUBSTRING_INDEX(CAST(month AS CHAR), '/', 1) AS UNSIGNED)
+WHERE CAST(month AS CHAR) LIKE '%/%';
