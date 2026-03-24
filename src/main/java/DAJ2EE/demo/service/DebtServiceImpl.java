@@ -29,10 +29,20 @@ public class DebtServiceImpl implements DebtService {
                         || i.getPaymentStatus() == PaymentStatus.OVERDUE)
                 .collect(Collectors.toList());
 
-        // Nhóm theo tenant
-        Map<Long, List<Invoice>> groupedByTenant = unpaidInvoices.stream()
-                .filter(i -> i.getContract() != null && i.getContract().getTenant() != null)
-                .collect(Collectors.groupingBy(i -> i.getContract().getTenant().getId()));
+        // Nhóm theo tenant (Ưu tiên lấy từ Contract, nếu không thì lấy từ User liên kết trực tiếp)
+        Map<Long, List<Invoice>> groupedByTenant = new HashMap<>();
+        for (Invoice inv : unpaidInvoices) {
+            Long tid = null;
+            if (inv.getContract() != null && inv.getContract().getTenant() != null) {
+                tid = inv.getContract().getTenant().getId();
+            } else if (inv.getUser() != null) {
+                tid = inv.getUser().getId();
+            }
+            
+            if (tid != null) {
+                groupedByTenant.computeIfAbsent(tid, k -> new ArrayList<>()).add(inv);
+            }
+        }
 
         List<DebtSummaryDto> result = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -40,13 +50,14 @@ public class DebtServiceImpl implements DebtService {
         for (Map.Entry<Long, List<Invoice>> entry : groupedByTenant.entrySet()) {
             List<Invoice> tenantInvoices = entry.getValue();
             Invoice firstInvoice = tenantInvoices.get(0);
-            User tenant = firstInvoice.getContract().getTenant();
+            
+            User tenant = (firstInvoice.getContract() != null && firstInvoice.getContract().getTenant() != null)
+                    ? firstInvoice.getContract().getTenant() : firstInvoice.getUser();
 
             BigDecimal totalDebt = tenantInvoices.stream()
                     .map(Invoice::getTotalAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            // Tính tổng đã trả (từ payment_history CONFIRMED)
             BigDecimal totalPaid = tenantInvoices.stream()
                     .map(inv -> {
                         BigDecimal sum = paymentHistoryRepository.sumAmountPaidByInvoiceIdAndStatus(inv.getId(), PaymentHistoryStatus.CONFIRMED);
@@ -54,33 +65,34 @@ public class DebtServiceImpl implements DebtService {
                     })
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            // Tìm ngày đáo hạn sớm nhất
             Date oldestDue = tenantInvoices.stream()
                     .map(Invoice::getDueDate)
                     .filter(Objects::nonNull)
                     .min(Date::compareTo)
                     .orElse(null);
 
-            // Lấy phòng từ hợp đồng
-            String roomNumber = firstInvoice.getContract().getRoom() != null
-                    ? firstInvoice.getContract().getRoom().getRoomNumber()
-                    : "N/A";
+            // Lấy phòng dự phòng
+            String roomNumber = "N/A";
+            if (firstInvoice.getContract() != null && firstInvoice.getContract().getRoom() != null) {
+                roomNumber = firstInvoice.getContract().getRoom().getRoomNumber();
+            } else if (firstInvoice.getRoomName() != null) {
+                roomNumber = firstInvoice.getRoomName();
+            }
 
             DebtSummaryDto dto = new DebtSummaryDto();
             dto.setTenantId(tenant.getId());
             dto.setTenantName(tenant.getFullName());
             dto.setTenantPhone(tenant.getUsername());
             dto.setRoomNumber(roomNumber);
-            dto.setContractId(firstInvoice.getContract().getId());
+            dto.setContractId(firstInvoice.getContract() != null ? firstInvoice.getContract().getId() : null);
             dto.setInvoiceCount(tenantInvoices.size());
-            dto.setTotalDebt(totalDebt.subtract(totalPaid));  // Nợ = Tổng - Đã trả
+            dto.setTotalDebt(totalDebt.subtract(totalPaid));
             dto.setTotalPaid(totalPaid);
             dto.setOldestDueDate(oldestDue != null ? sdf.format(oldestDue) : "N/A");
 
             result.add(dto);
         }
 
-        // Sắp xếp theo nợ nhiều nhất trước
         result.sort((a, b) -> b.getTotalDebt().compareTo(a.getTotalDebt()));
         return result;
     }
@@ -106,7 +118,18 @@ public class DebtServiceImpl implements DebtService {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn ID: " + invoiceId));
 
-        User tenant = invoice.getContract().getTenant();
+        // Fix NullPointerException: Kiểm tra và lấy tenant an toàn
+        User tenant = null;
+        if (invoice.getContract() != null && invoice.getContract().getTenant() != null) {
+            tenant = invoice.getContract().getTenant();
+        } else if (invoice.getUser() != null) {
+            tenant = invoice.getUser();
+        }
+
+        if (tenant == null) {
+            throw new RuntimeException("Hóa đơn này không có thông tin người thuê.");
+        }
+
         if (!tenant.getId().equals(tenantId)) {
             throw new RuntimeException("Hóa đơn không thuộc về tenant này.");
         }
@@ -122,7 +145,6 @@ public class DebtServiceImpl implements DebtService {
         ph.setConfirmedAt(java.time.LocalDateTime.now());
         ph.setStatus(PaymentHistoryStatus.CONFIRMED);
 
-        // Cập nhật trạng thái hóa đơn sang PAID
         invoice.setPaymentStatus(PaymentStatus.PAID);
         invoice.setPaymentDate(java.time.LocalDateTime.now());
         invoiceRepository.save(invoice);

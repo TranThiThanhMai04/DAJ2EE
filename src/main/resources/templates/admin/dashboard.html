@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}"></head>
+<body>
+    <div class="admin-wrapper">
+        <div th:replace="~{layouts/fragments :: admin_sidebar}"></div>
+
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded-3 mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-text fw-bold text-dark">Báo Cáo & Thông Báo</span>
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted">Chào, <strong th:text="${#authentication.name}">Admin</strong></span>
+                        <a href="/logout" class="btn btn-outline-danger btn-sm"><i class="fas fa-power-off"></i></a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid">
+                <!-- Thẻ tóm tắt tổng quát -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card glass-card border-0 p-3 shadow-sm border-start border-primary border-4">
+                            <h6 class="text-muted small fw-bold text-uppercase">Doanh Thu Năm</h6>
+                            <h4 class="fw-bold text-primary mb-0" id="stat-totalRevenue">0 đ</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card glass-card border-0 p-3 shadow-sm border-start border-success border-4">
+                            <h6 class="text-muted small fw-bold text-uppercase">Hợp Đồng Hiệu Lực</h6>
+                            <h4 class="fw-bold text-success mb-0" id="stat-activeContracts">0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card glass-card border-0 p-3 shadow-sm border-start border-warning border-4">
+                            <h6 class="text-muted small fw-bold text-uppercase">Yêu cầu Sửa chữa</h6>
+                            <h4 class="fw-bold text-warning mb-0" id="stat-totalMaintenance">0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card glass-card border-0 p-3 shadow-sm border-start border-danger border-4">
+                            <h6 class="text-muted small fw-bold text-uppercase">Hóa Đơn Chưa Thu</h6>
+                            <h4 class="fw-bold text-danger mb-0" id="stat-unpaidInvoices">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <!-- Tổng quan doanh thu năm -->
+                    <div class="col-lg-8">
+                        <div class="card glass-card border-0 shadow-sm p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0">Số liệu Doanh thu 2026</h5>
+                                <a href="/api/reports/export-excel" class="btn btn-success btn-sm rounded-pill px-3">
+                                    <i class="fas fa-file-excel me-1"></i> Xuất Báo cáo Excel
+                                </a>
+                            </div>
+                            <canvas id="revenueChart" height="150"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Thống kê trạng thái phòng -->
+                    <div class="col-lg-4">
+                        <div class="card glass-card border-0 p-4 shadow-sm h-100">
+                            <h5 class="fw-bold mb-4 text-center"><i class="fas fa-bed me-2 text-success"></i>Trạng thái Phòng</h5>
+                            <div style="max-height: 250px;">
+                                <canvas id="roomChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script th:inline="javascript">
+        // 1. Vẽ biểu đồ doanh thu (Line Chart)
+        fetch('/api/reports/revenue?year=2026')
+            .then(res => res.json())
+            .then(data => {
+                // Điền thông tin tóm tắt
+                const sm = data.summary;
+                const formatter = new Intl.NumberFormat('vi-VN');
+                document.getElementById('stat-totalRevenue').textContent = (sm.totalRevenue ? formatter.format(sm.totalRevenue) : '0') + ' đ';
+                document.getElementById('stat-activeContracts').textContent = sm.activeContracts || '0';
+                document.getElementById('stat-totalMaintenance').textContent = sm.totalMaintenanceCount || '0';
+                document.getElementById('stat-unpaidInvoices').textContent = sm.unpaidInvoices || '0';
+
+                // Chỉ hiển thị biểu đồ đến tháng 3 (tránh dữ liệu ảo tháng 4+)
+                const currentMonth = 3; 
+                const labels = data.labels.slice(0, currentMonth);
+                const chartData = data.data.slice(0, currentMonth);
+
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: chartData,
+                            borderColor: '#4e73df',
+                            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#4e73df',
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Doanh thu: ' + formatter.format(context.raw) + ' đ';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            });
+
+        // 2. Vẽ biểu đồ trạng thái phòng (Doughnut Chart)
+        fetch('/api/reports/room-status')
+            .then(res => res.json())
+            .then(data => {
+                const ctx = document.getElementById('roomChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Trống', 'Đã thuê', 'Bảo trì'],
+                        datasets: [{
+                            data: [data.EMPTY || 0, data.OCCUPIED || 0, data.MAINTENANCE || 0],
+                            backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                            borderWidth: 0,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

@@ -29,20 +29,18 @@ public interface ServiceUsageRepository extends JpaRepository<ServiceUsage, Long
                                             @Param("month") Integer month, 
                                             @Param("year") Integer year);
 
-        // Native insert to ensure all required DB columns are provided (some environments have extra NOT NULL columns)
-        @org.springframework.transaction.annotation.Transactional
-        @org.springframework.data.jpa.repository.Modifying
-        @Query(value = "INSERT INTO service_usage (month, new_value, old_value, current_reading, previous_reading, amount, reading_month, reading_year, reading_date, room_id, service_id, year) VALUES (:month, :newValue, :oldValue, :currentReading, :previousReading, :amount, :readingMonth, :readingYear, :readingDate, :roomId, :serviceId, :year)", nativeQuery = true)
-        void insertUsage(@Param("month") Integer month,
-                                                @Param("newValue") Integer newValue,
-                                                @Param("oldValue") Integer oldValue,
-                                                @Param("currentReading") Integer currentReading,
-                                                @Param("previousReading") Integer previousReading,
-                                                @Param("amount") java.math.BigDecimal amount,
-                                                @Param("readingMonth") Integer readingMonth,
-                                                @Param("readingYear") Integer readingYear,
-                                                @Param("readingDate") java.sql.Date readingDate,
-                                                @Param("roomId") Long roomId,
-                                                @Param("serviceId") Long serviceId,
-                                                @Param("year") Integer year);
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = "INSERT INTO service_usage (month, new_value, old_value, current_reading, previous_reading, amount, reading_year, reading_date, room_id, service_id, year) VALUES (:month, :newValue, :oldValue, :currentReading, :previousReading, :amount, :readingYear, :readingDate, :roomId, :serviceId, :year)", nativeQuery = true)
+    void insertUsage(@Param("month") Integer month,
+                     @Param("newValue") Integer newValue,
+                     @Param("oldValue") Integer oldValue,
+                     @Param("currentReading") Integer currentReading,
+                     @Param("previousReading") Integer previousReading,
+                     @Param("amount") java.math.BigDecimal amount,
+                     @Param("readingYear") Integer readingYear,
+                     @Param("readingDate") java.sql.Date readingDate,
+                     @Param("roomId") Long roomId,
+                     @Param("serviceId") Long serviceId,
+                     @Param("year") Integer year);
 }

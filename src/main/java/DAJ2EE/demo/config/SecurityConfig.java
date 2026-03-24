@@ -15,6 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.boot.CommandLineRunner;
+import DAJ2EE.demo.repository.UserRepository;
+import DAJ2EE.demo.entity.User;
+import java.util.Optional;
 
 @Configuration
 @EnableWebSecurity
@@ -32,8 +36,8 @@ public class SecurityConfig {
     // Khai báo rõ ràng DaoAuthenticationProvider gắn UserDetailsService + PasswordEncoder
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        // Spring Security 7: constructor nhận UserDetailsService, sau đó set PasswordEncoder
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -61,6 +65,7 @@ public class SecurityConfig {
                 .failureHandler(customAuthenticationFailureHandler())
                 .permitAll()
             )
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/notifications/**", "/api/**"))
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
@@ -91,6 +96,19 @@ public class SecurityConfig {
                 response.sendRedirect("/admin/login?error");
             } else {
                 response.sendRedirect("/login?error");
+            }
+        };
+    }
+
+    @Bean
+    public CommandLineRunner initAdminPassword(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        return args -> {
+            Optional<User> adminOpt = userRepository.findByUsername("admin");
+            if (adminOpt.isPresent()) {
+                User admin = adminOpt.get();
+                admin.setPassword(passwordEncoder.encode("123456"));
+                userRepository.save(admin);
+                System.out.println(">>> Đã reset mật khẩu admin thành: 123456");
             }
         };
     }

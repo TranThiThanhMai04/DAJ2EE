@@ -96,7 +96,7 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                     usage.getMonth(), usage.getNewValue(), usage.getOldValue(),
                     usage.getCurrentReading(), usage.getPreviousReading(),
                     usage.getAmount(),
-                    usage.getMonth(), usage.getReadingYear(),
+                    usage.getReadingYear(),
                     java.sql.Date.valueOf(usage.getReadingDate()),
                     usage.getRoom().getId(), usage.getService().getId(), usage.getYear());
             return usage;

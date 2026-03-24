@@ -25,6 +25,13 @@ public class Invoice {
     @JoinColumn(name = "contract_id")
     private Contract contract;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "room_name")
+    private String roomName;
+
     @Column(nullable = false)
     private int month;
 
