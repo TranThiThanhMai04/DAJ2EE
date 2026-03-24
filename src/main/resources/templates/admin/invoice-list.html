@@ -67,7 +67,7 @@
                                 <tbody>
                                     <tr th:each="invoice : ${invoices}">
                                         <td th:text="${invoice.id}">1</td>
-                                        <td th:text="${invoice.contract.room.roomNumber}" class="fw-bold">A-101</td>
+                                        <td th:text="${invoice.contract?.room?.roomNumber ?: 'Trống'}" class="fw-bold">A-101</td>
                                         <td th:text="${invoice.month + '/' + invoice.year}">03/2026</td>
                                         <td th:text="${#dates.format(invoice.issueDate, 'dd/MM/yyyy')}">23/03/2026</td>
                                         <td th:text="${#dates.format(invoice.dueDate, 'dd/MM/yyyy')}" class="text-danger fw-bold">30/03/2026</td>
@@ -78,7 +78,14 @@
                                             <span th:if="${invoice.paymentStatus.name() == 'OVERDUE'}" class="badge bg-soft-danger">Quá hạn</span>
                                         </td>
                                         <td>
-                                            <form th:if="${invoice.paymentStatus.name() != 'PAID'}" th:action="@{/admin/invoices/{id}/pay(id=${invoice.id})}" method="post" style="display:inline;">
+                                            <form th:if="${invoice.paymentStatus.name() != 'PAID'}" th:action="@{/admin/debts/pay}" method="post" style="display:inline;">
+                                                <input type="hidden" name="invoiceId" th:value="${invoice.id}" />
+                                                <input th:if="${invoice.contract != null and invoice.contract.tenant != null}" type="hidden" name="tenantId" th:value="${invoice.contract.tenant.id}" />
+                                                <input th:unless="${invoice.contract != null and invoice.contract.tenant != null}" type="hidden" name="tenantId" value="0" />
+                                                <select name="method" class="form-select form-select-sm d-inline-block w-auto rounded-pill mx-1" required>
+                                                    <option value="CASH">Tiền mặt</option>
+                                                    <option value="TRANSFER">Chuyển khoản</option>
+                                                </select>
                                                 <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">Xác nhận thanh toán</button>
                                             </form>
                                             <a th:href="@{/admin/invoices/{id}(id=${invoice.id})}" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="fas fa-eye"></i></a>
