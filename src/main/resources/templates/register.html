@@ -99,6 +99,19 @@
                             <button type="submit" class="btn btn-gradient w-100 py-2 fw-bold shadow">HOÀN TẤT ĐĂNG KÝ</button>
                         </form>
 
+                        <div class="position-relative my-4 text-center">
+                            <hr class="text-white-50">
+                            <span class="position-absolute top-50 start-50 translate-middle bg-transparent px-2 text-white-50 small">HOẶC</span>
+                        </div>
+
+                        <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-light w-100 rounded-pill py-2 small fw-bold shadow-sm mb-3">
+                            <img src="https://www.google.com/favicon.ico" width="16" class="me-2"> Đăng ký nhanh bằng Google
+                        </a>
+
+                        <div class="alert alert-info bg-info bg-opacity-10 border-0 text-white small mt-2">
+                            Tài khoản tạo bằng Google sẽ ở trạng thái chờ phê duyệt (enabled = false). Ban Quản Lý sẽ xác minh và bổ sung CCCD trước khi kích hoạt.
+                        </div>
+
                         <div class="text-center mt-4">
                             <span class="small text-white-50">Đã có tài khoản?</span>
                             <a href="/login" class="small fw-bold text-white text-decoration-none ms-1">Đăng nhập ngay</a>

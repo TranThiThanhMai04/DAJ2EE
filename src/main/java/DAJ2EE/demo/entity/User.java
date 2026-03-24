@@ -24,11 +24,13 @@ public class User {
 
     private String email;
 
-    private String cccd; // Số căn cước công dân
+    private String provider; // LOCAL / GOOGLE
 
-    private String gender; // Giới tính (MALE, FEMALE)
+    private String cccd; 
 
-    private String hometown; // Quê quán (Tên tỉnh thành)
+    private String gender;
+
+    private String hometown; 
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")

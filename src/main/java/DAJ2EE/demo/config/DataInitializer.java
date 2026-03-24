@@ -29,7 +29,7 @@ public class DataInitializer {
                     .orElse(null);
 
             if (adminRole == null) {
-                System.out.println("⚠️ Không tìm thấy ROLE_ADMIN trong DB. Hãy kiểm tra data.sql.");
+                System.out.println("Không tìm thấy ROLE_ADMIN trong DB. Hãy kiểm tra data.sql.");
                 return;
             }
 
@@ -43,7 +43,7 @@ public class DataInitializer {
             admin.setStatus(1);
             userRepository.save(admin);
 
-            System.out.println("✅ Admin user đã được khởi tạo/cập nhật với mật khẩu BCrypt chuẩn.");
+            System.out.println("Admin user đã được khởi tạo/cập nhật với mật khẩu BCrypt chuẩn.");
         };
     }
 }

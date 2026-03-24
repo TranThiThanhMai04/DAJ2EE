@@ -36,8 +36,15 @@ public class ProfileController {
      */
     @GetMapping("/tenant/profile")
     public String viewProfile(Model model) {
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(currentUsername)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier;
+        if (auth != null && auth.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
+            identifier = oAuth2User.getAttribute("email");
+        } else {
+            identifier = auth.getName();
+        }
+
+        User user = userRepository.findByUsernameOrEmail(identifier, identifier)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người dùng đang đăng nhập!"));
 
         model.addAttribute("user", user);
@@ -63,8 +70,13 @@ public class ProfileController {
         }
 
         try {
-            // 2. Lấy username hiện tại từ Authentication (Principal)
-            String currentUsername = authentication.getName();
+            // 2. Lấy định danh hiện tại (username cho form login, email cho OAuth2)
+            String currentUsername;
+            if (authentication != null && authentication.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
+                currentUsername = oAuth2User.getAttribute("email");
+            } else {
+                currentUsername = authentication.getName();
+            }
             
             // 3. Gọi service để thực hiện logic cập nhật
             userService.updateProfile(currentUsername, dto);

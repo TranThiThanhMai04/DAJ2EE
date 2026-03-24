@@ -1,6 +1,6 @@
 # 🚨 GHI CHÚ BỔ SUNG DATABASE TRÊN NHÁNH DEVELOP 🚨
 
-Chào team, tôi (Ngân) vừa hoàn thiện luồng **Hệ thống Đăng ký chặn chờ Admin duyệt (Pending Approvals)** tại nhánh Develop. Để chạy được code mới nhất, mọi người vui lòng chú ý cập nhật Database của từng cá nhân theo hướng dẫn sau nhé!
+Chào team, tôi (Ngân) vừa hoàn thiện luồng **Hệ thống Đăng ký chặn chờ Admin duyệt (Pending Approvals)**. Để chạy được code mới nhất, mọi người vui lòng chú ý cập nhật Database của từng cá nhân theo hướng dẫn sau nhé!
 
 ---
 
