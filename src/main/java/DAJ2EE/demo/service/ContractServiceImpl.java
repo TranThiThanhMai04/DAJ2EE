@@ -82,8 +82,12 @@ public class ContractServiceImpl implements ContractService {
         tenant.setGender(dto.getTenantGender());
         userRepository.save(tenant);
 
-        // Todo: Có thể kiểm tra thêm người thuê có hợp đồng active khác hay không nếu cần.
-        // Hiện tại giả định 1 người có thể thuê nhiều phòng.
+        // Kiểm tra giới hạn số lượng phòng thuê (tối đa 5 phòng ACTIVE hoặc PENDING)
+        List<ContractStatus> activeOrPendingStatuses = java.util.Arrays.asList(ContractStatus.ACTIVE, ContractStatus.PENDING);
+        List<Contract> tenantContracts = contractRepository.findByTenantIdAndStatusIn(tenant.getId(), activeOrPendingStatuses);
+        if (tenantContracts.size() >= 5) {
+            throw new IllegalArgumentException("Mỗi người thuê chỉ được thuê tối đa 5 phòng (bao gồm cả hợp đồng đang hiệu lực và đang chờ xác nhận).");
+        }
 
         Contract contract = new Contract();
         contract.setRoom(room);
@@ -132,9 +136,10 @@ public class ContractServiceImpl implements ContractService {
             throw new IllegalArgumentException("Khách chỉ có thể xác nhận hợp đồng ở trạng thái Chờ xác nhận (PENDING)");
         }
 
+        // Kiểm tra giới hạn: 1 người tối đa chỉ thuê được 5 phòng ACTIVE
         List<Contract> activeContracts = contractRepository.findByTenantIdAndStatus(tenantId, ContractStatus.ACTIVE);
-        if (!activeContracts.isEmpty()) {
-            throw new IllegalArgumentException("Bạn đã có một hợp đồng Đang hiệu lực. Mỗi người thuê chỉ được có tối đa 1 hợp đồng ACTIVE.");
+        if (activeContracts.size() >= 5) {
+            throw new IllegalArgumentException("Bạn đã đạt giới hạn tối đa 5 hợp đồng Đang hiệu lực (ACTIVE).");
         }
 
         contract.setStatus(ContractStatus.ACTIVE);
