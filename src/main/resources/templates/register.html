@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}">
+    <title>Đăng ký Cư dân | Apartment Portal</title>
+</head>
+<body class="gradient-bg d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 50px 0;">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="card glass-card-login border-0 p-4 shadow-lg">
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <h2 class="fw-bold text-white">ĐĂNG KÝ TÀI KHOẢN</h2>
+                            <p class="text-white-50 small">Vui lòng điền chính xác thông tin để làm hợp đồng</p>
+                        </div>
+
+                        <!-- Hiện lỗi chung (mật khẩu không khớp, SĐT trùng...) -->
+                        <div th:if="${errorMessage}" class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white small text-center mb-3">
+                            <span th:text="${errorMessage}"></span>
+                        </div>
+
+                        <!-- Hiện thông báo đăng ký thành công (khi redirect từ trang khác về) -->
+                        <!-- (Không dùng ở đây vì trang này là form – success redirect đến /login?success) -->
+
+                        <!--
+                            th:object="${registerForm}" → gắn DTO vào form
+                            th:field="*{phone}" → tự điền name="phone", id="phone", value từ DTO
+                            th:errors="*{phone}" → hiện thông báo lỗi của field phone
+                        -->
+                        <form th:action="@{/register}" th:object="${registerForm}" method="post">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-white">Họ và Tên</label>
+                                    <input type="text" th:field="*{fullName}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="Nguyễn Văn A">
+                                    <!-- Hiện lỗi validation của field fullName -->
+                                    <small th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"
+                                           class="text-warning"></small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-white">Số điện thoại (dùng để đăng nhập)</label>
+                                    <input type="text" th:field="*{phone}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="09xx...">
+                                    <small th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"
+                                           class="text-warning"></small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-white">Email</label>
+                                    <input type="email" th:field="*{email}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="vi-du@gmail.com">
+                                    <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                                           class="text-warning"></small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-white">Số CCCD (12 số)</label>
+                                    <input type="text" th:field="*{cccd}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="040...">
+                                    <small th:if="${#fields.hasErrors('cccd')}" th:errors="*{cccd}"
+                                           class="text-warning"></small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-white">Mật khẩu</label>
+                                    <input type="password" th:field="*{password}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="Tối thiểu 8 ký tự">
+                                    <small th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
+                                           class="text-warning"></small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-white">Xác nhận mật khẩu</label>
+                                    <input type="password" th:field="*{confirmPassword}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="Nhập lại mật khẩu">
+                                    <small th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"
+                                           class="text-warning"></small>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold text-white">Mã phòng dự kiến (Nếu có)</label>
+                                <input type="text" th:field="*{roomNumber}"
+                                       class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                       placeholder="Ví dụ: A-101">
+                            </div>
+
+                            <button type="submit" class="btn btn-gradient w-100 py-2 fw-bold shadow">HOÀN TẤT ĐĂNG KÝ</button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <span class="small text-white-50">Đã có tài khoản?</span>
+                            <a href="/login" class="small fw-bold text-white text-decoration-none ms-1">Đăng nhập ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

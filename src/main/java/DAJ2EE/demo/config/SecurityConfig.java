@@ -1,0 +1,115 @@
+package DAJ2EE.demo.config;
+
+import DAJ2EE.demo.service.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.boot.CommandLineRunner;
+import DAJ2EE.demo.repository.UserRepository;
+import DAJ2EE.demo.entity.User;
+import java.util.Optional;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity // Bật Method Security để dùng @PreAuthorize
+public class SecurityConfig {
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // Khai báo rõ ràng DaoAuthenticationProvider gắn UserDetailsService + PasswordEncoder
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    // Expose AuthenticationManager để Spring Security dùng provider ở trên
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authenticationProvider(authenticationProvider()) // Gắn provider vào filter chain
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/admin/login").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/tenant/**").hasRole("TENANT")
+                .anyRequest().authenticated()
+            )
+            .formLogin(login -> login
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .successHandler(customAuthenticationSuccessHandler())
+                .failureHandler(customAuthenticationFailureHandler())
+                .permitAll()
+            )
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/notifications/**", "/api/**"))
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .permitAll()
+            );
+
+        return http.build();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(grant -> grant.getAuthority().equals("ROLE_ADMIN"));
+            if (isAdmin) {
+                response.sendRedirect("/admin");
+            } else {
+                response.sendRedirect("/tenant");
+            }
+        };
+    }
+
+    @Bean
+    public AuthenticationFailureHandler customAuthenticationFailureHandler() {
+        return (request, response, exception) -> {
+            String referer = request.getHeader("Referer");
+            if (referer != null && referer.contains("/admin/login")) {
+                response.sendRedirect("/admin/login?error");
+            } else {
+                response.sendRedirect("/login?error");
+            }
+        };
+    }
+
+    @Bean
+    public CommandLineRunner initAdminPassword(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        return args -> {
+            Optional<User> adminOpt = userRepository.findByUsername("admin");
+            if (adminOpt.isPresent()) {
+                User admin = adminOpt.get();
+                admin.setPassword(passwordEncoder.encode("123456"));
+                userRepository.save(admin);
+                System.out.println(">>> Đã reset mật khẩu admin thành: 123456");
+            }
+        };
+    }
+}
