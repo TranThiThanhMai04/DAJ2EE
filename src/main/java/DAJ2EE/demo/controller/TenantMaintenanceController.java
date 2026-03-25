@@ -25,7 +25,7 @@ public class TenantMaintenanceController {
 
     @GetMapping
     public String listRequests(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
+        User user = userService.findByUsername(userDetails.getUsername());
         List<MaintenanceRequest> requests = maintenanceRequestService.getRequestsByUser(user);
         model.addAttribute("requests", requests);
         return "tenant/maintenance-requests";
@@ -37,7 +37,7 @@ public class TenantMaintenanceController {
                                 @AuthenticationPrincipal UserDetails userDetails,
                                 RedirectAttributes redirectAttributes) {
         try {
-            User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
+            User user = userService.findByUsername(userDetails.getUsername());
             maintenanceRequestService.createRequest(user, description, image);
             redirectAttributes.addFlashAttribute("successDetails", "Đã gửi yêu cầu sửa chữa thành công!");
         } catch (Exception e) {

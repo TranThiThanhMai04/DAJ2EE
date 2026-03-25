@@ -25,7 +25,7 @@ public class InvoiceControllerTenant {
 
     @GetMapping
     public String listInvoices(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
+        User user = userService.findByUsername(userDetails.getUsername());
         List<Invoice> invoices = invoiceService.getInvoicesByTenant(user.getId());
         model.addAttribute("invoices", invoices);
         return "tenant/invoice-list";

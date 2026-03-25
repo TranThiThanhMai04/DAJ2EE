@@ -3,6 +3,10 @@ package DAJ2EE.demo.service;
 import DAJ2EE.demo.dto.UserRegistrationDto;
 import DAJ2EE.demo.dto.ProfileUpdateDto;
 import DAJ2EE.demo.dto.ChangePasswordDto;
+import DAJ2EE.demo.dto.TenantRequestDto;
+import DAJ2EE.demo.entity.User;
+
+import java.util.List;
 
 /**
  * Interface định nghĩa các hành động liên quan tới User
@@ -44,4 +48,29 @@ public interface UserService {
      * Đổi mật khẩu cho người dùng hiện tại
      */
     void changePassword(String currentUsername, ChangePasswordDto dto);
+
+    // =====================================================================
+    // Các method bổ sung sau merge develop (dùng cho quản lý Tenant & Contract)
+    // =====================================================================
+
+    /** Lấy tất cả người dùng (dùng trong ContractController, TenantUserController) */
+    List<User> getAllUsers();
+
+    /** Lấy tất cả người dùng có role ROLE_TENANT (dùng trong TenantController) */
+    List<User> getAllTenants();
+
+    /** Lấy thông tin một Tenant theo ID */
+    User getTenantById(Long id);
+
+    /** Cập nhật thông tin Tenant (Admin dùng) */
+    void updateTenant(Long id, TenantRequestDto dto);
+
+    /** Xóa Tenant khỏi hệ thống */
+    void deleteTenant(Long id);
+
+    /** Phê duyệt tài khoản Tenant (enabled = true) */
+    void approveTenant(Long id);
+
+    /** Tìm User theo username (dùng trong InvoiceControllerTenant, TenantMaintenanceController, TenantPaymentHistoryController) */
+    User findByUsername(String username);
 }

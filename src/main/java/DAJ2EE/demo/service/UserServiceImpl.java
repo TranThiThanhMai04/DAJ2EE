@@ -3,11 +3,14 @@ package DAJ2EE.demo.service;
 import DAJ2EE.demo.dto.UserRegistrationDto;
 import DAJ2EE.demo.dto.ProfileUpdateDto;
 import DAJ2EE.demo.dto.ChangePasswordDto;
+import DAJ2EE.demo.dto.TenantRequestDto;
 import DAJ2EE.demo.entity.Permission;
 import DAJ2EE.demo.entity.Role;
 import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.exception.ResourceNotFoundException;
 import DAJ2EE.demo.repository.PermissionRepository;
+
+import java.util.List;
 import DAJ2EE.demo.repository.RoleRepository;
 import DAJ2EE.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,5 +184,64 @@ public class UserServiceImpl implements UserService {
         // 4. Mã hóa và lưu mật khẩu mới
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
+    }
+
+    // =====================================================================
+    // Implementations các method bổ sung sau merge develop
+    // =====================================================================
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public List<User> getAllTenants() {
+        return userRepository.findByRoleName("ROLE_TENANT");
+    }
+
+    @Override
+    public User getTenantById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Tenant với ID: " + id));
+    }
+
+    @Override
+    @Transactional
+    public void updateTenant(Long id, TenantRequestDto dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Tenant với ID: " + id));
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setCccd(dto.getCccd());
+        // Chỉ cập nhật mật khẩu nếu admin nhập mật khẩu mới
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTenant(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Không tìm thấy Tenant với ID: " + id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void approveTenant(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Tenant với ID: " + id));
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + username));
     }
 }

@@ -71,7 +71,8 @@ public class TenantUserController {
         return "tenant/contract-detail";
     }
 
-    @GetMapping("/profile")
+    // NOTE: Không map vào "/profile" để tránh trùng route với `ProfileController#viewProfile`
+    @GetMapping("/profile-tenant")
     public String viewProfile(Model model) {
         User currentUser = getCurrentUser();
         TenantRequestDto dto = new TenantRequestDto();
@@ -83,7 +84,7 @@ public class TenantUserController {
         return "tenant/profile";
     }
 
-    @PostMapping("/profile/update")
+    @PostMapping("/profile-tenant/update")
     public String updateProfile(@Valid @ModelAttribute("profileDto") TenantRequestDto dto,
                                 BindingResult result,
                                 RedirectAttributes redirectAttributes) {

@@ -212,4 +212,15 @@ public class AdminController {
         model.addAttribute("fullName", "Admin Panel");
         return "admin/index";
     }
+
+    /**
+     * Trang danh sách cư dân (TENANT) đã được duyệt.
+     */
+    @GetMapping("/residents")
+    public String residents(Model model) {
+        List<User> tenants = userRepository.findByRoleName("ROLE_TENANT");
+        model.addAttribute("tenants", tenants);
+        model.addAttribute("fullName", "Admin Panel");
+        return "admin/residents";
+    }
 }

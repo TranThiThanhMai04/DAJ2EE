@@ -28,4 +28,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Kiểm tra xem username (SĐT) đã tồn tại cho người dùng khác hay chưa
     boolean existsByUsernameAndIdNot(String username, Long id);
+
+    // Lấy danh sách người dùng theo tên Role
+    List<User> findByRoleName(String roleName);
 }

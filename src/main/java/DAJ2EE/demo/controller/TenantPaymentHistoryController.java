@@ -27,7 +27,7 @@ public class TenantPaymentHistoryController {
      */
     @GetMapping
     public String myPaymentHistory(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
+        User user = userService.findByUsername(userDetails.getUsername());
         List<PaymentHistory> histories = debtService.getPaymentHistoryByTenant(user.getId());
         model.addAttribute("histories", histories);
         model.addAttribute("tenantName", user.getFullName());
