@@ -1,11 +1,13 @@
 package DAJ2EE.demo.config;
 
 import DAJ2EE.demo.service.CustomUserDetailsService;
+import DAJ2EE.demo.service.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,6 +25,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -49,7 +54,7 @@ public class SecurityConfig {
         http
             .authenticationProvider(authenticationProvider()) // Gắn provider vào filter chain
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/admin/login").permitAll()
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/admin/login", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/tenant/**").hasRole("TENANT")
                 .anyRequest().authenticated()
@@ -60,6 +65,12 @@ public class SecurityConfig {
                 .successHandler(customAuthenticationSuccessHandler())
                 .failureHandler(customAuthenticationFailureHandler())
                 .permitAll()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .successHandler(customAuthenticationSuccessHandler())
+                .failureHandler(customAuthenticationFailureHandler())
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
@@ -87,11 +98,24 @@ public class SecurityConfig {
     public AuthenticationFailureHandler customAuthenticationFailureHandler() {
         return (request, response, exception) -> {
             String referer = request.getHeader("Referer");
+            boolean isDisabled = isOrCausedByDisabled(exception);
+            
             if (referer != null && referer.contains("/admin/login")) {
-                response.sendRedirect("/admin/login?error");
+                response.sendRedirect("/admin/login?" + (isDisabled ? "disabled" : "error"));
             } else {
-                response.sendRedirect("/login?error");
+                response.sendRedirect("/login?" + (isDisabled ? "disabled" : "error"));
             }
         };
+    }
+
+    private boolean isOrCausedByDisabled(Throwable exception) {
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof DisabledException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }

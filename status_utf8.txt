@@ -1,0 +1,117 @@
+﻿On branch feature/minh-tenant-management
+Your branch is up to date with 'origin/feature/minh-tenant-management'.
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	new file:   BOSUNGDB.md
+	new file:   ENCODING_FIX.md
+	new file:   MinhDB.md
+	new file:   THEMCOTDB.md
+	new file:   apartmentmanagement.sql
+	new file:   build.log
+	modified:   database.db
+	modified:   pom.xml
+	new file:   run.log
+	new file:   sql/apartmentmanagement_dump.sql
+	new file:   sql/convert_to_utf8mb4.sql
+	modified:   src/main/java/DAJ2EE/demo/config/DataInitializer.java
+	modified:   src/main/java/DAJ2EE/demo/config/SecurityConfig.java
+	new file:   src/main/java/DAJ2EE/demo/config/WebMvcConfig.java
+	modified:   src/main/java/DAJ2EE/demo/controller/AdminController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/AdminMaintenanceController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/AdminNotificationController.java
+	modified:   src/main/java/DAJ2EE/demo/controller/AuthController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/DebtController.java
+	modified:   src/main/java/DAJ2EE/demo/controller/HomeController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/InvoiceController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/InvoiceControllerTenant.java
+	new file:   src/main/java/DAJ2EE/demo/controller/PaymentController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/ProfileController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/ReportController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/ServiceController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/TenantMaintenanceController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/TenantNotificationController.java
+	new file:   src/main/java/DAJ2EE/demo/controller/TenantPaymentHistoryController.java
+	new file:   src/main/java/DAJ2EE/demo/dto/ChangePasswordDto.java
+	new file:   src/main/java/DAJ2EE/demo/dto/DebtSummaryDto.java
+	new file:   src/main/java/DAJ2EE/demo/dto/ProfileUpdateDto.java
+	new file:   src/main/java/DAJ2EE/demo/entity/Invoice.java
+	new file:   src/main/java/DAJ2EE/demo/entity/MaintenanceRequest.java
+	new file:   src/main/java/DAJ2EE/demo/entity/MaintenanceStatus.java
+	new file:   src/main/java/DAJ2EE/demo/entity/Notification.java
+	new file:   src/main/java/DAJ2EE/demo/entity/PaymentHistory.java
+	new file:   src/main/java/DAJ2EE/demo/entity/PaymentHistoryStatus.java
+	new file:   src/main/java/DAJ2EE/demo/entity/PaymentStatus.java
+	modified:   src/main/java/DAJ2EE/demo/entity/Permission.java
+	new file:   src/main/java/DAJ2EE/demo/entity/Service.java
+	new file:   src/main/java/DAJ2EE/demo/entity/ServiceUsage.java
+	new file:   src/main/java/DAJ2EE/demo/repository/InvoiceRepository.java
+	new file:   src/main/java/DAJ2EE/demo/repository/MaintenanceRequestRepository.java
+	new file:   src/main/java/DAJ2EE/demo/repository/NotificationRepository.java
+	new file:   src/main/java/DAJ2EE/demo/repository/PaymentHistoryRepository.java
+	new file:   src/main/java/DAJ2EE/demo/repository/ServiceRepository.java
+	new file:   src/main/java/DAJ2EE/demo/repository/ServiceUsageRepository.java
+	new file:   src/main/java/DAJ2EE/demo/service/CustomOAuth2UserService.java
+	modified:   src/main/java/DAJ2EE/demo/service/CustomUserDetailsService.java
+	new file:   src/main/java/DAJ2EE/demo/service/DebtService.java
+	new file:   src/main/java/DAJ2EE/demo/service/DebtServiceImpl.java
+	new file:   src/main/java/DAJ2EE/demo/service/InvoiceService.java
+	new file:   src/main/java/DAJ2EE/demo/service/InvoiceServiceImpl.java
+	new file:   src/main/java/DAJ2EE/demo/service/MaintenanceRequestService.java
+	new file:   src/main/java/DAJ2EE/demo/service/MaintenanceRequestServiceImpl.java
+	new file:   src/main/java/DAJ2EE/demo/service/NotificationService.java
+	new file:   src/main/java/DAJ2EE/demo/service/NotificationServiceImpl.java
+	new file:   src/main/java/DAJ2EE/demo/service/ServiceUsageService.java
+	new file:   src/main/java/DAJ2EE/demo/service/ServiceUsageServiceImpl.java
+	modified:   src/main/resources/application.properties
+	modified:   src/main/resources/data.sql
+	new file:   src/main/resources/static/css/admin.css
+	new file:   src/main/resources/static/js/profile.js
+	new file:   src/main/resources/static/uploads/proofs/proof_2_1774279853637.png
+	new file:   src/main/resources/templates/admin/dashboard.html
+	new file:   src/main/resources/templates/admin/debt-dashboard.html
+	new file:   src/main/resources/templates/admin/invoice-detail.html
+	new file:   src/main/resources/templates/admin/invoice-list.html
+	new file:   src/main/resources/templates/admin/maintenance-requests.html
+	new file:   src/main/resources/templates/admin/payment-history.html
+	new file:   src/main/resources/templates/admin/pending-approvals.html
+	modified:   src/main/resources/templates/admin/permissions.html
+	new file:   src/main/resources/templates/admin/reports.html
+	new file:   src/main/resources/templates/admin/residents.html
+	new file:   src/main/resources/templates/admin/services.html
+	modified:   src/main/resources/templates/login.html
+	new file:   src/main/resources/templates/payment/checkout.html
+	new file:   src/main/resources/templates/payment/success.html
+	modified:   src/main/resources/templates/register.html
+	new file:   src/main/resources/templates/tenant/invoice-detail.html
+	new file:   src/main/resources/templates/tenant/invoice-list.html
+	new file:   src/main/resources/templates/tenant/maintenance-requests.html
+	new file:   src/main/resources/templates/tenant/notifications.html
+	new file:   src/main/resources/templates/tenant/payment-history.html
+	new file:   startup_error.log
+	new file:   uploads/d5c1514a-b435-4600-838a-9652ba99e248.jpg
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+	both added:      src/main/java/DAJ2EE/demo/controller/TenantUserController.java
+	both modified:   src/main/java/DAJ2EE/demo/entity/User.java
+	both added:      src/main/java/DAJ2EE/demo/repository/ContractRepository.java
+	both added:      src/main/java/DAJ2EE/demo/repository/RoomRepository.java
+	both modified:   src/main/java/DAJ2EE/demo/repository/UserRepository.java
+	both added:      src/main/java/DAJ2EE/demo/service/ContractServiceImpl.java
+	both modified:   src/main/java/DAJ2EE/demo/service/UserService.java
+	both modified:   src/main/java/DAJ2EE/demo/service/UserServiceImpl.java
+	both modified:   src/main/resources/templates/layouts/fragments.html
+	both added:      src/main/resources/templates/tenant/profile.html
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	all_branches.txt
+	all_branches_utf8.txt
+	conflicts.txt
+	status.txt
+	status_utf8.txt
+

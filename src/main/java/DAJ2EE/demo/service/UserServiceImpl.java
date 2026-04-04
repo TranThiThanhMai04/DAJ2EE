@@ -1,11 +1,15 @@
 package DAJ2EE.demo.service;
 
 import DAJ2EE.demo.dto.UserRegistrationDto;
+import DAJ2EE.demo.dto.ProfileUpdateDto;
+import DAJ2EE.demo.dto.ChangePasswordDto;
+import DAJ2EE.demo.dto.TenantRequestDto;
 import DAJ2EE.demo.entity.Permission;
 import DAJ2EE.demo.entity.Role;
 import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.exception.ResourceNotFoundException;
 import DAJ2EE.demo.repository.PermissionRepository;
+import DAJ2EE.demo.repository.ContractRepository;
 import DAJ2EE.demo.repository.RoleRepository;
 import DAJ2EE.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Arrays;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -26,6 +33,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PermissionRepository permissionRepository;
+
+    @Autowired
+    private ContractRepository contractRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -58,6 +68,7 @@ public class UserServiceImpl implements UserService {
         }
         user.setRole(tenantRole);
         user.setStatus(1); // Mặc định Hoạt động
+        user.setEnabled(false); // Chưa kiểm duyệt, không thể đăng nhập
 
         userRepository.save(user);
     }
@@ -75,10 +86,8 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ADMIN')")
     public void approveTenant(Long id) {
         User user = getTenantById(id);
-        if (user.getStatus() == 1) {
-            throw new IllegalArgumentException("Khách thuê này đã được phê duyệt hợp lệ từ trước!");
-        }
         user.setStatus(1);
+        user.setEnabled(true);
         userRepository.save(user);
     }
 
@@ -107,9 +116,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 5. Bảo vệ Admin cuối cùng (Last Admin Standing)
-        // Nếu User mục tiêu hiện đang là ADMIN và Role mới KHÔNG PHẢI là ADMIN
         if ("ROLE_ADMIN".equals(targetUser.getRole().getName()) && !"ROLE_ADMIN".equals(newRole.getName())) {
-            // Đếm số lượng Admin đang active (status = 1)
             long adminCount = userRepository.countByRoleNameAndStatus("ROLE_ADMIN", 1);
             if (adminCount <= 1) {
                 throw new IllegalStateException("Hệ thống phải duy trì ít nhất 1 Quản trị viên!");
@@ -148,12 +155,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public java.util.List<User> getAllUsers() {
+    @Transactional
+    public void updateProfile(String currentUsername, ProfileUpdateDto dto) {
+        User user = userRepository.findByUsernameOrEmail(currentUsername, currentUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + currentUsername));
+        user.setFullName(dto.getFullName());
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String currentUsername, ChangePasswordDto dto) {
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + currentUsername));
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác!");
+        }
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Mật khẩu mới và xác nhận mật khẩu không khớp!");
+        }
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @Override
-    public java.util.List<User> getAllTenants() {
+    public List<User> getAllTenants() {
         return userRepository.findByRoleName("ROLE_TENANT");
     }
 
@@ -169,10 +200,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateTenant(Long id, DAJ2EE.demo.dto.TenantRequestDto dto) {
+    public void updateTenant(Long id, TenantRequestDto dto) {
         User user = getTenantById(id);
         
-        // Kiểm tra xem SĐT mới có bị trùng với người khác không
         if (!user.getUsername().equals(dto.getPhone()) && isUsernameExist(dto.getPhone())) {
             throw new IllegalArgumentException("Số điện thoại này đã được đăng ký cho người khác");
         }
@@ -192,18 +222,21 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    @Autowired
-    private DAJ2EE.demo.repository.ContractRepository contractRepository;
-
     @Override
     @Transactional
     public void deleteTenant(Long id) {
         User user = getTenantById(id);
-        java.util.List<DAJ2EE.demo.entity.Contract> activeContracts = contractRepository.findByTenantIdAndStatusIn(id, java.util.Arrays.asList(DAJ2EE.demo.entity.ContractStatus.ACTIVE, DAJ2EE.demo.entity.ContractStatus.PENDING));
+        // Check for active contracts
+        java.util.List<DAJ2EE.demo.entity.Contract> activeContracts = contractRepository.findByTenantIdAndStatusIn(id, Arrays.asList(DAJ2EE.demo.entity.ContractStatus.ACTIVE, DAJ2EE.demo.entity.ContractStatus.PENDING));
         if (activeContracts != null && !activeContracts.isEmpty()) {
             throw new IllegalArgumentException("Không thể xóa khách thuê đang có hợp đồng có hiệu lực hoặc đang chờ xác nhận");
         }
-        // Xóa tenant
         userRepository.delete(user);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + username));
     }
 }

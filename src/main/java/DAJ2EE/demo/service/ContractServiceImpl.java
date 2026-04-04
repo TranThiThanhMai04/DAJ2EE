@@ -76,13 +76,11 @@ public class ContractServiceImpl implements ContractService {
         User tenant = userRepository.findById(dto.getTenantId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách thuê"));
 
-        // Cập nhật thông tin profile của khách thuê từ Form Hợp đồng
         tenant.setFullName(dto.getTenantFullName());
         tenant.setHometown(dto.getTenantHometown());
         tenant.setGender(dto.getTenantGender());
         userRepository.save(tenant);
 
-        // Kiểm tra giới hạn số lượng phòng thuê (tối đa 5 phòng ACTIVE hoặc PENDING)
         List<ContractStatus> activeOrPendingStatuses = java.util.Arrays.asList(ContractStatus.ACTIVE, ContractStatus.PENDING);
         List<Contract> tenantContracts = contractRepository.findByTenantIdAndStatusIn(tenant.getId(), activeOrPendingStatuses);
         if (tenantContracts.size() >= 5) {
@@ -98,7 +96,6 @@ public class ContractServiceImpl implements ContractService {
         contract.setMonthlyRent(dto.getMonthlyRent());
         contract.setStatus(ContractStatus.PENDING);
 
-        // Đổi trạng thái phòng thành OCCUPIED (Đã thuê) ngay lập tức
         room.setStatus(RoomStatus.OCCUPIED);
         roomRepository.save(room);
         
@@ -115,7 +112,6 @@ public class ContractServiceImpl implements ContractService {
 
         contract.setStatus(ContractStatus.EXPIRED);
         
-        // Trả phòng về trống
         Room room = contract.getRoom();
         room.setStatus(RoomStatus.EMPTY);
         roomRepository.save(room);
@@ -136,7 +132,6 @@ public class ContractServiceImpl implements ContractService {
             throw new IllegalArgumentException("Khách chỉ có thể xác nhận hợp đồng ở trạng thái Chờ xác nhận (PENDING)");
         }
 
-        // Kiểm tra giới hạn: 1 người tối đa chỉ thuê được 5 phòng ACTIVE
         List<Contract> activeContracts = contractRepository.findByTenantIdAndStatus(tenantId, ContractStatus.ACTIVE);
         if (activeContracts.size() >= 5) {
             throw new IllegalArgumentException("Bạn đã đạt giới hạn tối đa 5 hợp đồng Đang hiệu lực (ACTIVE).");

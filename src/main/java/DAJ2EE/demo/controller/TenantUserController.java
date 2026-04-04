@@ -80,6 +80,7 @@ public class TenantUserController {
         dto.setEmail(currentUser.getEmail());
         dto.setCccd(currentUser.getCccd());
         model.addAttribute("profileDto", dto);
+        model.addAttribute("user", currentUser); // Added for modern profile template
         return "tenant/profile";
     }
 
@@ -87,21 +88,19 @@ public class TenantUserController {
     public String updateProfile(@Valid @ModelAttribute("profileDto") TenantRequestDto dto,
                                 BindingResult result,
                                 RedirectAttributes redirectAttributes) {
-        // Chỉ cho phép cập nhật SĐT (Username) và Password
         if (result.hasFieldErrors("phone") || result.hasFieldErrors("password") || result.hasFieldErrors("confirmPassword")) {
             return "tenant/profile";
         }
         try {
             User currentUser = getCurrentUser();
             
-            // Re-map các field bị khóa để không bị mất
             dto.setFullName(currentUser.getFullName());
             dto.setEmail(currentUser.getEmail());
             dto.setCccd(currentUser.getCccd());
 
             userService.updateTenant(currentUser.getId(), dto);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thành công. Nếu đổi số điện thoại, bạn cần đăng nhập lại!");
-            return "redirect:/login"; // Bắt đăng nhập lại nếu đổi username/pass
+            return "redirect:/login"; 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/tenant/profile";

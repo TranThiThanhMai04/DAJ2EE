@@ -35,6 +35,9 @@ public class User {
     @Column(unique = true)
     private String cccd; // Số căn cước công dân
 
+    @Column(name = "provider")
+    private String provider; // LOCAL / GOOGLE
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
@@ -44,4 +47,5 @@ public class User {
     private Set<Permission> permissions = new HashSet<>();
 
     private int status;
+    private boolean enabled = false;
 }

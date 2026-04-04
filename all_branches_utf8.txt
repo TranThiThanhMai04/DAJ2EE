@@ -1,0 +1,19 @@
+﻿* develop2
+  feature/minh-
+  feature/minh-tenant-management
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/develop
+  remotes/origin/develop2
+  remotes/origin/feature/Lieu-Notifications-and-reports
+  remotes/origin/feature/hang-debt-history
+  remotes/origin/feature/mai-service
+  remotes/origin/feature/manh-room-management
+  remotes/origin/feature/minh-tenant-management
+  remotes/origin/feature/ngan-auth-2
+  remotes/origin/feature/ngan-auth-google
+  remotes/origin/feature/nhulieu-Invoices-payments
+  remotes/origin/feature/quan-maintenance
+  remotes/origin/main
+  remotes/origin/revert-1-feature/Lieu-Notifications-and-reports
+  remotes/origin/revert-13-feature/mai-service
+  remotes/origin/revert-2-feature/quan-maintenance

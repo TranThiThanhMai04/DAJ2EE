@@ -15,5 +15,5 @@ public class Permission {
     private Integer id;
 
     @Column(unique = true, nullable = false)
-    private String name; // e.g., OP_EDIT_ROOM, OP_VIEW_REPORT
+    private String name; 
 }

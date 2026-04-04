@@ -1,6 +1,12 @@
 package DAJ2EE.demo.service;
 
 import DAJ2EE.demo.dto.UserRegistrationDto;
+import DAJ2EE.demo.dto.ProfileUpdateDto;
+import DAJ2EE.demo.dto.ChangePasswordDto;
+import DAJ2EE.demo.dto.TenantRequestDto;
+import DAJ2EE.demo.entity.User;
+
+import java.util.List;
 
 /**
  * Interface định nghĩa các hành động liên quan tới User
@@ -39,27 +45,30 @@ public interface UserService {
     void updateUserPermission(Long userId, String permissionName, boolean enabled);
 
     /**
-     * Lấy toàn bộ danh sách người dùng trong hệ thống
+     * Cập nhật hồ sơ cá nhân cho người dùng hiện tại
      */
-    java.util.List<DAJ2EE.demo.entity.User> getAllUsers();
+    void updateProfile(String currentUsername, ProfileUpdateDto dto);
 
     /**
-     * Lấy danh sách những người dùng có vai trò là Khách thuê (ROLE_TENANT)
+     * Đổi mật khẩu cho người dùng hiện tại
      */
-    java.util.List<DAJ2EE.demo.entity.User> getAllTenants();
+    void changePassword(String currentUsername, ChangePasswordDto dto);
 
-    /**
-     * Lấy Khách thuê theo ID
-     */
-    DAJ2EE.demo.entity.User getTenantById(Long id);
+    /** Lấy tất cả người dùng */
+    List<User> getAllUsers();
 
-    /**
-     * Cập nhật thông tin khách thuê
-     */
-    void updateTenant(Long id, DAJ2EE.demo.dto.TenantRequestDto dto);
+    /** Lấy tất cả người dùng có role ROLE_TENANT */
+    List<User> getAllTenants();
 
-    /**
-     * Xóa khách thuê (Chỉ cho phép khi không có hợp đồng đang active)
-     */
+    /** Lấy thông tin một Tenant theo ID */
+    User getTenantById(Long id);
+
+    /** Cập nhật thông tin Tenant (Admin dùng) */
+    void updateTenant(Long id, TenantRequestDto dto);
+
+    /** Xóa Tenant khỏi hệ thống */
     void deleteTenant(Long id);
+
+    /** Tìm User theo username */
+    User findByUsername(String username);
 }
