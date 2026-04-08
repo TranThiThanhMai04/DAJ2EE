@@ -4,8 +4,7 @@ import DAJ2EE.demo.dto.DebtSummaryDto;
 import DAJ2EE.demo.entity.PaymentHistory;
 import DAJ2EE.demo.service.DebtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -69,8 +68,8 @@ public class DebtController {
                                  @RequestParam("tenantId") Long tenantId,
                                  @RequestParam(value = "method", defaultValue = "CASH") String method,
                                  @RequestParam(value = "note", required = false) String note,
-                                 @AuthenticationPrincipal UserDetails userDetails) {
-        debtService.recordPayment(invoiceId, tenantId, method, note, userDetails.getUsername());
+                                 Authentication authentication) {
+        debtService.recordPayment(invoiceId, tenantId, method, note, authentication.getName());
         return "redirect:/admin/debts";
     }
 }

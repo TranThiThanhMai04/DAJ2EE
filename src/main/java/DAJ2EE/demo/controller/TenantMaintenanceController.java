@@ -5,8 +5,7 @@ import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.service.MaintenanceRequestService;
 import DAJ2EE.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +23,8 @@ public class TenantMaintenanceController {
     private final UserService userService;
 
     @GetMapping
-    public String listRequests(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername());
+    public String listRequests(Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName());
         List<MaintenanceRequest> requests = maintenanceRequestService.getRequestsByUser(user);
         model.addAttribute("requests", requests);
         return "tenant/maintenance-requests";
@@ -34,10 +33,10 @@ public class TenantMaintenanceController {
     @PostMapping("/create")
     public String createRequest(@RequestParam("description") String description,
                                 @RequestParam(value = "image", required = false) MultipartFile image,
-                                @AuthenticationPrincipal UserDetails userDetails,
+                                Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
         try {
-            User user = userService.findByUsername(userDetails.getUsername());
+            User user = userService.findByUsername(authentication.getName());
             maintenanceRequestService.createRequest(user, description, image);
             redirectAttributes.addFlashAttribute("successDetails", "Đã gửi yêu cầu sửa chữa thành công!");
         } catch (Exception e) {

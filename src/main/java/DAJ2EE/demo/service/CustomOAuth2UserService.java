@@ -96,6 +96,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         }
 
-        return new DefaultOAuth2User(authorities, oauth2User.getAttributes(), nameAttributeKey);
+        // Luôn sử dụng email làm định danh duy nhất (username) để đồng nhất với hệ thống local
+        return new DefaultOAuth2User(authorities, oauth2User.getAttributes(), "email");
     }
 }

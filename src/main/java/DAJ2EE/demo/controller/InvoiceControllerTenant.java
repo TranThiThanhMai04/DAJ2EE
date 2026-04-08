@@ -5,8 +5,7 @@ import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.service.InvoiceService;
 import DAJ2EE.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +23,8 @@ public class InvoiceControllerTenant {
     private final DAJ2EE.demo.repository.ServiceUsageRepository serviceUsageRepository;
 
     @GetMapping
-    public String listInvoices(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername());
+    public String listInvoices(Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName());
         List<Invoice> invoices = invoiceService.getInvoicesByTenant(user.getId());
         model.addAttribute("invoices", invoices);
         model.addAttribute("user", user);
@@ -34,8 +33,8 @@ public class InvoiceControllerTenant {
     }
 
     @GetMapping("/{id}")
-    public String viewInvoice(@PathVariable("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername());
+    public String viewInvoice(@PathVariable("id") Long id, Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName());
         Invoice invoice = invoiceService.getInvoiceById(id);
         model.addAttribute("invoice", invoice);
         model.addAttribute("user", user);

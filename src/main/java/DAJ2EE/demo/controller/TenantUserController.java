@@ -31,13 +31,11 @@ public class TenantUserController {
     // Lấy User đang đăng nhập
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        // Cần phương thức findByUsername để lấy User objects.
-        // Giả sử userService có phương thức getUser(username) hoặc mình lấy list và filter.
-        // Tạm thời getAllTenants() và filter.
-        return userService.getAllUsers().stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng hiện tại"));
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng hiện tại");
+        }
+        return user;
     }
 
     @GetMapping("/contracts")
