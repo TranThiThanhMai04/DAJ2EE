@@ -31,6 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+.m2/
+uploads/
+*.log
+*.txt
 
 ### Project Specific ###
 src/main/resources/application-local.properties
