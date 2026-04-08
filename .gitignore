@@ -39,3 +39,8 @@ uploads/
 ### Project Specific ###
 src/main/resources/application-local.properties
 .application-local.properties
+database.db
+*.sql
+*.md
+!README.md
+BCryptGen.java
