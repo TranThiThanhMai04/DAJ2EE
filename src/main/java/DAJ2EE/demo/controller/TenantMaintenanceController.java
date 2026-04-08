@@ -2,8 +2,8 @@ package DAJ2EE.demo.controller;
 
 import DAJ2EE.demo.entity.MaintenanceRequest;
 import DAJ2EE.demo.entity.User;
-import DAJ2EE.demo.service.CurrentUserService;
 import DAJ2EE.demo.service.MaintenanceRequestService;
+import DAJ2EE.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -20,11 +20,11 @@ import java.util.List;
 public class TenantMaintenanceController {
 
     private final MaintenanceRequestService maintenanceRequestService;
-    private final CurrentUserService currentUserService;
+    private final UserService userService;
 
     @GetMapping
     public String listRequests(Model model, Authentication authentication) {
-        User user = currentUserService.getRequiredUser(authentication);
+        User user = userService.findByUsername(authentication.getName());
         List<MaintenanceRequest> requests = maintenanceRequestService.getRequestsByUser(user);
         model.addAttribute("requests", requests);
         return "tenant/maintenance-requests";
@@ -36,7 +36,7 @@ public class TenantMaintenanceController {
                                 Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
         try {
-            User user = currentUserService.getRequiredUser(authentication);
+            User user = userService.findByUsername(authentication.getName());
             maintenanceRequestService.createRequest(user, description, image);
             redirectAttributes.addFlashAttribute("successDetails", "Đã gửi yêu cầu sửa chữa thành công!");
         } catch (Exception e) {

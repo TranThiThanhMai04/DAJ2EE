@@ -54,7 +54,4 @@ public class ServiceUsage {
 
     @Column(name = "year", nullable = false)
     private Integer year;
-
-    @Column(name = "reading_status", length = 30)
-    private String readingStatus = "Đã chốt";
 }

@@ -2,8 +2,8 @@ package DAJ2EE.demo.controller;
 
 import DAJ2EE.demo.entity.PaymentHistory;
 import DAJ2EE.demo.entity.User;
-import DAJ2EE.demo.service.CurrentUserService;
 import DAJ2EE.demo.service.DebtService;
+import DAJ2EE.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -19,14 +19,14 @@ import java.util.List;
 public class TenantPaymentHistoryController {
 
     private final DebtService debtService;
-    private final CurrentUserService currentUserService;
+    private final UserService userService;
 
     /**
      * Người thuê xem lịch sử thanh toán của chính mình
      */
     @GetMapping
     public String myPaymentHistory(Model model, Authentication authentication) {
-        User user = currentUserService.getRequiredUser(authentication);
+        User user = userService.findByUsername(authentication.getName());
         List<PaymentHistory> histories = debtService.getPaymentHistoryByTenant(user.getId());
         model.addAttribute("histories", histories);
         model.addAttribute("tenantName", user.getFullName());

@@ -38,26 +38,66 @@
         </div>
       </div>
 
-      <div id="content">
-        <div
-          class="container-fluid tenant-dashboard-shell px-2 px-md-3 px-xl-4"
-        >
-          <nav
-            class="navbar navbar-expand-lg navbar-light tenant-topbar shadow-sm rounded-4 mb-5"
-          >
-            <div class="container-fluid px-2 px-md-3">
-              <div class="tenant-system-title">
-                <p class="tenant-system-subtitle mb-1">TENANT PORTAL</p>
-                <h1 class="tenant-system-name mb-0">
-                  Hệ thống Quản lý Chung cư Mini 2026
-                </h1>
-              </div>
-              <div
-                class="ms-auto d-flex align-items-center gap-3 tenant-user-meta"
-              >
-                <div class="text-end">
-                  <small class="text-muted d-block">Xin chào</small>
-                  <span class="fw-semibold" th:text="${fullName}">A</span>
+        <div id="content">
+            <!-- Navbar top -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded-3 mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-text fw-bold text-dark">Hệ thống Quản lý Chung cư Mini 2026</span>
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="me-3 text-muted">Chào, <strong th:text="${fullName}">A</strong></span>
+                        <a href="/logout" class="btn btn-outline-danger btn-sm"><i class="fas fa-power-off"></i></a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid">
+                <div class="card gradient-header shadow-sm mb-4">
+                    <div class="card-body p-4 text-center">
+                        <h3 class="fw-bold">Xin chào, <span th:text="${fullName}">A</span>!</h3>
+                        <p class="mb-0">Chào mừng bạn quay trở lại. Hãy kiểm tra các thông báo mới nhất bên dưới.</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="card glass-card shadow-sm mb-4">
+                            <div class="card-header bg-transparent fw-bold text-uppercase pt-3 border-0 d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-bullhorn me-2 text-danger"></i>Thông báo mới</span>
+                                <a href="/tenant/notifications" class="btn btn-sm btn-outline-primary rounded-pill px-3">Xem tất cả</a>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush bg-transparent">
+                                    <li th:each="notif : ${notifications}" class="list-group-item bg-transparent" 
+                                        th:classappend="${!notif.isRead} ? 'border-start border-primary border-3' : ''">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1">
+                                                    <span th:if="${!notif.isRead}" class="badge bg-danger me-1">Mới</span>
+                                                    📢 <span th:text="${notif.title}">Tiêu đề</span>
+                                                </h6>
+                                                <p class="small text-muted mb-0" th:text="${notif.content}">Nội dung</p>
+                                                <small class="text-secondary"><i class="far fa-clock me-1"></i><span th:text="${#temporals.format(notif.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</span></small>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li th:if="${#lists.isEmpty(notifications)}" class="list-group-item bg-transparent text-center text-muted py-4">
+                                        <i class="fas fa-bell-slash fa-2x mb-2 d-block"></i>
+                                        Chưa có thông báo nào.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="card glass-card shadow-sm text-center p-4">
+                            <i class="fas fa-wallet fa-3x mb-3 text-primary"></i>
+                            <h2 class="fw-bold" th:text="${totalUnpaid}">1.200.000 đ</h2>
+                            <p class="text-muted">Tổng nợ tháng này</p>
+                            <a href="#" class="btn btn-primary w-100 fw-bold border-0" 
+                               style="background: var(--primary-gradient);">THANH TOÁN NGAY</a>
+                        </div>
+                    </div>
                 </div>
                 <a
                   href="/logout"

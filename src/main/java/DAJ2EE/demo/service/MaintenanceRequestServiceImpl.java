@@ -13,9 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,12 +25,6 @@ public class MaintenanceRequestServiceImpl implements MaintenanceRequestService 
 
     @Autowired
     private ContractRepository contractRepository;
-
-    @Autowired
-    private NotificationRealtimeService notificationRealtimeService;
-
-    @Autowired
-    private NotificationService notificationService;
 
     private final String UPLOAD_DIR = "uploads/";
 
@@ -89,19 +81,7 @@ public class MaintenanceRequestServiceImpl implements MaintenanceRequestService 
             request.setImageUrl("/uploads/" + fileName);
         }
 
-        MaintenanceRequest savedRequest = maintenanceRequestRepository.save(request);
-
-        notificationRealtimeService.publishPortalSyncToAdmins(
-            buildPortalSyncPayload(
-                "maintenance",
-                "created",
-                "Có yêu cầu sửa chữa mới từ cư dân",
-                savedRequest.getId(),
-                List.of("/admin/maintenance", "/admin", "/admin/index")
-            )
-        );
-
-        return savedRequest;
+        return maintenanceRequestRepository.save(request);
     }
 
     @Override
@@ -110,45 +90,8 @@ public class MaintenanceRequestServiceImpl implements MaintenanceRequestService 
         if (requestOpt.isPresent()) {
             MaintenanceRequest req = requestOpt.get();
             req.setStatus(status);
-            MaintenanceRequest savedRequest = maintenanceRequestRepository.save(req);
-
-            if (savedRequest.getUser() != null && savedRequest.getUser().getId() != null) {
-                String statusLabel = status != null ? status.name() : "UNKNOWN";
-                notificationService.sendNotificationToUser(
-                        savedRequest.getUser().getId(),
-                        "Cập nhật yêu cầu sửa chữa",
-                        "Yêu cầu sửa chữa #" + savedRequest.getId() + " đã chuyển sang trạng thái: " + statusLabel
-                );
-
-                notificationRealtimeService.publishPortalSyncToUserAndAdmins(
-                        savedRequest.getUser().getId(),
-                        buildPortalSyncPayload(
-                                "maintenance",
-                                "status-updated",
-                                "Trạng thái yêu cầu sửa chữa đã thay đổi",
-                                savedRequest.getId(),
-                                List.of("/tenant/maintenance", "/tenant/notifications", "/admin/maintenance", "/admin", "/admin/index")
-                        )
-                );
-            }
-
-            return savedRequest;
+            return maintenanceRequestRepository.save(req);
         }
         return null;
-    }
-
-    private Map<String, Object> buildPortalSyncPayload(String entity,
-                                                       String action,
-                                                       String message,
-                                                       Long referenceId,
-                                                       List<String> targetPages) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("entity", entity);
-        payload.put("action", action);
-        payload.put("message", message);
-        payload.put("referenceId", referenceId);
-        payload.put("targetPages", targetPages);
-        payload.put("timestamp", System.currentTimeMillis());
-        return payload;
     }
 }

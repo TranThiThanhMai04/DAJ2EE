@@ -5,7 +5,6 @@ import DAJ2EE.demo.repository.ContractRepository;
 import DAJ2EE.demo.repository.InvoiceRepository;
 import DAJ2EE.demo.repository.ServiceUsageRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +21,12 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final ContractRepository contractRepository;
     private final ServiceUsageRepository serviceUsageRepository;
     private final ServiceUsageService serviceUsageService;
     private final AuditLogService auditLogService;
-    private final InvoiceNotificationDispatcher invoiceNotificationDispatcher;
-    private final NotificationRealtimeService notificationRealtimeService;
 
     @Override
     @Transactional
@@ -45,7 +41,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         // Kiểm tra xem đã có hóa đơn cho tháng/năm này chưa
         invoiceRepository.findByContractIdAndMonthAndYear(contract.getId(), month, year)
-            .ifPresent(i -> { throw new RuntimeException("Hợp đồng tháng này đã được lập, không được tạo lại"); });
+                .ifPresent(i -> { throw new RuntimeException("Hóa đơn cho tháng này đã tồn tại."); });
 
         // Nếu admin cung cấp chỉ số, lưu chúng trước.
         // Sau đó hợp nhất với dữ liệu vừa truy vấn để không bị phụ thuộc vào việc native insert
@@ -120,26 +116,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         // Ghi nhật ký hệ thống
         auditLogService.log("Tạo hóa đơn", "Đã tạo hóa đơn mới cho phòng " + contract.getRoom().getRoomNumber() + 
             " (Tháng " + month + "/" + year + ") - Tổng tiền: " + totalAmount.toString() + "đ");
-
-        try {
-            invoiceNotificationDispatcher.notifyInvoiceCreated(savedInvoice);
-        } catch (Exception ex) {
-            // Không làm fail giao dịch tạo hóa đơn nếu kênh thông báo bên ngoài gặp lỗi
-            log.warn("Invoice {} was created but notification dispatch failed: {}", savedInvoice.getId(), ex.getMessage());
-        }
-
-        if (savedInvoice.getUser() != null && savedInvoice.getUser().getId() != null) {
-            notificationRealtimeService.publishPortalSyncToUserAndAdmins(
-                    savedInvoice.getUser().getId(),
-                    buildPortalSyncPayload(
-                            "invoice",
-                            "created",
-                            "Hóa đơn mới vừa được tạo",
-                            savedInvoice.getId(),
-                                List.of("/tenant", "/tenant/invoices", "/tenant/notifications", "/admin/invoices", "/admin", "/admin/index")
-                    )
-            );
-        }
             
         return savedInvoice;
     }
@@ -205,20 +181,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setProofImageUrl(proofUrl);
             invoice.setRejectionReason(null); // Clear reason if new proof uploaded
         }
-        Invoice savedInvoice = invoiceRepository.save(invoice);
-
-        if (savedInvoice.getUser() != null && savedInvoice.getUser().getId() != null) {
-            notificationRealtimeService.publishPortalSyncToUserAndAdmins(
-                    savedInvoice.getUser().getId(),
-                    buildPortalSyncPayload(
-                            "invoice",
-                            "payment-updated",
-                            "Trạng thái thanh toán hóa đơn vừa thay đổi",
-                            savedInvoice.getId(),
-                                List.of("/tenant", "/tenant/invoices", "/tenant/payment-history", "/tenant/notifications", "/admin/invoices", "/admin", "/admin/index", "/admin/payment-history")
-                    )
-            );
-        }
+        invoiceRepository.save(invoice);
     }
 
     @Override
@@ -228,40 +191,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setPaymentStatus(PaymentStatus.UNPAID);
         invoice.setRejectionReason(reason);
         invoice.setProofImageUrl(null); // Clear invalid proof so they can re-upload
-        Invoice savedInvoice = invoiceRepository.save(invoice);
-
-        if (savedInvoice.getUser() != null && savedInvoice.getUser().getId() != null) {
-            notificationRealtimeService.publishPortalSyncToUserAndAdmins(
-                    savedInvoice.getUser().getId(),
-                    buildPortalSyncPayload(
-                            "invoice",
-                            "payment-rejected",
-                            "Yêu cầu thanh toán đã bị từ chối",
-                            savedInvoice.getId(),
-                            List.of("/tenant", "/tenant/invoices", "/tenant/notifications", "/admin/invoices", "/admin/payment-history")
-                    )
-            );
-        }
+        invoiceRepository.save(invoice);
     }
 
     @Override
     public BigDecimal getRevenue(int month, int year) {
         BigDecimal revenue = invoiceRepository.sumPaidAmountByMonthAndYear(month, year);
         return revenue != null ? revenue : BigDecimal.ZERO;
-    }
-
-    private Map<String, Object> buildPortalSyncPayload(String entity,
-                                                       String action,
-                                                       String message,
-                                                       Long referenceId,
-                                                       List<String> targetPages) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("entity", entity);
-        payload.put("action", action);
-        payload.put("message", message);
-        payload.put("referenceId", referenceId);
-        payload.put("targetPages", targetPages);
-        payload.put("timestamp", System.currentTimeMillis());
-        return payload;
     }
 }

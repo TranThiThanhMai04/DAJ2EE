@@ -4,11 +4,11 @@ import DAJ2EE.demo.dto.TenantRequestDto;
 import DAJ2EE.demo.entity.Contract;
 import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.service.ContractService;
-import DAJ2EE.demo.service.CurrentUserService;
 import DAJ2EE.demo.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,12 +28,14 @@ public class TenantUserController {
     @Autowired
     private ContractService contractService;
 
-    @Autowired
-    private CurrentUserService currentUserService;
-
     // Lấy User đang đăng nhập
     private User getCurrentUser() {
-        return currentUserService.getRequiredUser();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng hiện tại");
+        }
+        return user;
     }
 
     @GetMapping("/contracts")

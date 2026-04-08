@@ -1,10 +1,7 @@
 package DAJ2EE.demo.controller;
 
-import DAJ2EE.demo.entity.Invoice;
-import DAJ2EE.demo.entity.PaymentStatus;
 import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.repository.UserRepository;
-import DAJ2EE.demo.service.InvoiceService;
 import DAJ2EE.demo.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -29,9 +26,6 @@ public class HomeController {
     @Autowired
     private NotificationService notificationService;
 
-    @Autowired
-    private InvoiceService invoiceService;
-
     @GetMapping("/")
     public String index() {
         return "index";
@@ -53,43 +47,15 @@ public class HomeController {
                 // Load thông báo thực từ database
                 model.addAttribute("notifications", notificationService.getNotificationsForUser(u.getId()));
                 model.addAttribute("unreadCount", notificationService.countUnread(u.getId()));
-
-                List<Invoice> tenantInvoices = invoiceService.getInvoicesByTenant(u.getId());
-                BigDecimal totalUnpaidAmount = tenantInvoices.stream()
-                        .filter(this::isPendingPayment)
-                        .map(Invoice::getTotalAmount)
-                        .filter(amount -> amount != null)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                Long payNowInvoiceId = tenantInvoices.stream()
-                        .filter(this::isPendingPayment)
-                        .sorted(Comparator.comparing(Invoice::getDueDate, Comparator.nullsLast(Comparator.naturalOrder())))
-                        .map(Invoice::getId)
-                        .findFirst()
-                        .orElse(null);
-
-                boolean hasUnpaidInvoices = totalUnpaidAmount.compareTo(BigDecimal.ZERO) > 0;
-                boolean hasInvoices = !tenantInvoices.isEmpty();
-
-                model.addAttribute("totalUnpaid", formatCurrency(totalUnpaidAmount));
-                model.addAttribute("hasUnpaidInvoices", hasUnpaidInvoices);
-                model.addAttribute("hasInvoices", hasInvoices);
-                model.addAttribute("payNowUrl", payNowInvoiceId != null ? "/payment/" + payNowInvoiceId : "/tenant/invoices");
             });
         }
 
         // Fallback nếu không load được
         if (!model.containsAttribute("notifications")) {
-            model.addAttribute("notifications", Collections.emptyList());
+            model.addAttribute("notifications", java.util.Collections.emptyList());
         }
 
-        if (!model.containsAttribute("totalUnpaid")) {
-            model.addAttribute("totalUnpaid", formatCurrency(BigDecimal.ZERO));
-            model.addAttribute("hasUnpaidInvoices", false);
-            model.addAttribute("hasInvoices", false);
-            model.addAttribute("payNowUrl", "/tenant/invoices");
-        }
-
+        model.addAttribute("totalUnpaid", "1.200.000 đ");
         return "tenant/index";
     }
 

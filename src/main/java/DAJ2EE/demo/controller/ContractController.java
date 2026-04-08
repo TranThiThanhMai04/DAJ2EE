@@ -76,13 +76,6 @@ public class ContractController {
                     .toList());
             model.addAttribute("tenants", userService.getAllUsers());
             return "admin/contract-form";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Không thể tạo hợp đồng do lỗi hệ thống: " + e.getMessage());
-            model.addAttribute("rooms", roomService.getAllRooms().stream()
-                    .filter(room -> room.getStatus() == RoomStatus.EMPTY)
-                    .toList());
-            model.addAttribute("tenants", userService.getAllUsers());
-            return "admin/contract-form";
         }
     }
 

@@ -10,20 +10,14 @@ import DAJ2EE.demo.exception.ResourceNotFoundException;
 import DAJ2EE.demo.repository.ContractRepository;
 import DAJ2EE.demo.repository.RoomRepository;
 import DAJ2EE.demo.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ContractServiceImpl implements ContractService {
-
-    private static final Logger log = LoggerFactory.getLogger(ContractServiceImpl.class);
 
     @Autowired
     private ContractRepository contractRepository;
@@ -33,12 +27,6 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private ContractNotificationDispatcher contractNotificationDispatcher;
-
-    @Autowired
-    private NotificationRealtimeService notificationRealtimeService;
 
     @Override
     @Transactional(readOnly = false)
@@ -72,14 +60,14 @@ public class ContractServiceImpl implements ContractService {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
         }
 
-        Room room = roomRepository.findByIdForUpdate(dto.getRoomId())
+        Room room = roomRepository.findById(dto.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng"));
 
         if (room.getStatus() != RoomStatus.EMPTY) {
             throw new IllegalArgumentException("Phòng này hiện không trống để cho thuê");
         }
 
-        List<ContractStatus> activeOrPending = List.of(ContractStatus.ACTIVE, ContractStatus.PENDING);
+        List<ContractStatus> activeOrPending = java.util.Arrays.asList(ContractStatus.ACTIVE, ContractStatus.PENDING);
         List<Contract> existingContracts = contractRepository.findByRoomIdAndStatusIn(room.getId(), activeOrPending);
         if (!existingContracts.isEmpty()) {
             throw new IllegalArgumentException("Phòng này đang có hợp đồng có hiệu lực hoặc đang chờ xác nhận");
@@ -93,7 +81,7 @@ public class ContractServiceImpl implements ContractService {
         tenant.setGender(dto.getTenantGender());
         userRepository.save(tenant);
 
-        List<ContractStatus> activeOrPendingStatuses = List.of(ContractStatus.ACTIVE, ContractStatus.PENDING);
+        List<ContractStatus> activeOrPendingStatuses = java.util.Arrays.asList(ContractStatus.ACTIVE, ContractStatus.PENDING);
         List<Contract> tenantContracts = contractRepository.findByTenantIdAndStatusIn(tenant.getId(), activeOrPendingStatuses);
         if (tenantContracts.size() >= 5) {
             throw new IllegalArgumentException("Mỗi người thuê chỉ được thuê tối đa 5 phòng (bao gồm cả hợp đồng đang hiệu lực và đang chờ xác nhận).");
@@ -110,27 +98,8 @@ public class ContractServiceImpl implements ContractService {
 
         room.setStatus(RoomStatus.OCCUPIED);
         roomRepository.save(room);
-
-        Contract savedContract = contractRepository.save(contract);
-        try {
-            contractNotificationDispatcher.notifyContractCreated(savedContract);
-        } catch (Exception ex) {
-            // Không làm fail giao dịch tạo hợp đồng nếu kênh thông báo bên ngoài gặp lỗi
-            log.warn("Contract {} was created but notification dispatch failed: {}", savedContract.getId(), ex.getMessage());
-        }
-
-        notificationRealtimeService.publishPortalSyncToUserAndAdmins(
-                tenant.getId(),
-                buildPortalSyncPayload(
-                        "contract",
-                        "created",
-                        "Hợp đồng mới đã được tạo",
-                        savedContract.getId(),
-                        List.of("/tenant", "/tenant/contracts", "/tenant/notifications", "/admin/contracts", "/admin", "/admin/index")
-                )
-        );
-
-        return savedContract;
+        
+        return contractRepository.save(contract);
     }
 
     @Override
@@ -147,28 +116,13 @@ public class ContractServiceImpl implements ContractService {
         room.setStatus(RoomStatus.EMPTY);
         roomRepository.save(room);
 
-        Contract savedContract = contractRepository.save(contract);
-
-        notificationRealtimeService.publishPortalSyncToUserAndAdmins(
-            contract.getTenant().getId(),
-            buildPortalSyncPayload(
-                "contract",
-                "terminated",
-                "Một hợp đồng đã được kết thúc",
-                savedContract.getId(),
-                List.of("/tenant", "/tenant/contracts", "/tenant/notifications", "/admin/contracts", "/admin", "/admin/index")
-            )
-        );
-
-        return savedContract;
+        return contractRepository.save(contract);
     }
 
     @Override
     @Transactional
     public void confirmContract(Long id, Long tenantId) {
         Contract contract = getContractById(id);
-        Room room = roomRepository.findByIdForUpdate(contract.getRoom().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng"));
         
         if (!contract.getTenant().getId().equals(tenantId)) {
             throw new IllegalArgumentException("Bạn không có quyền xác nhận hợp đồng này");
@@ -183,31 +137,13 @@ public class ContractServiceImpl implements ContractService {
             throw new IllegalArgumentException("Bạn đã đạt giới hạn tối đa 5 hợp đồng Đang hiệu lực (ACTIVE).");
         }
 
-        long roomContractConflicts = contractRepository.countByRoomIdAndStatusInAndIdNot(
-                room.getId(),
-                List.of(ContractStatus.ACTIVE, ContractStatus.PENDING),
-                contract.getId()
-        );
-        if (roomContractConflicts > 0) {
-            throw new IllegalArgumentException("Phòng này đã có hợp đồng khác đang hiệu lực hoặc chờ xác nhận");
-        }
-
         contract.setStatus(ContractStatus.ACTIVE);
+
+        Room room = contract.getRoom();
         room.setStatus(RoomStatus.OCCUPIED);
         roomRepository.save(room);
 
         contractRepository.save(contract);
-
-        notificationRealtimeService.publishPortalSyncToUserAndAdmins(
-            tenantId,
-            buildPortalSyncPayload(
-                "contract",
-                "confirmed",
-                "Hợp đồng đã được xác nhận",
-                contract.getId(),
-                List.of("/tenant", "/tenant/contracts", "/tenant/notifications", "/admin/contracts", "/admin", "/admin/index")
-            )
-        );
     }
 
     @Override
@@ -216,20 +152,5 @@ public class ContractServiceImpl implements ContractService {
         List<Contract> contracts = contractRepository.findByTenantId(tenantId);
         lazyUpdateContractStatuses(contracts);
         return contracts;
-    }
-
-    private Map<String, Object> buildPortalSyncPayload(String entity,
-                                                       String action,
-                                                       String message,
-                                                       Long referenceId,
-                                                       List<String> targetPages) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("entity", entity);
-        payload.put("action", action);
-        payload.put("message", message);
-        payload.put("referenceId", referenceId);
-        payload.put("targetPages", targetPages);
-        payload.put("timestamp", System.currentTimeMillis());
-        return payload;
     }
 }

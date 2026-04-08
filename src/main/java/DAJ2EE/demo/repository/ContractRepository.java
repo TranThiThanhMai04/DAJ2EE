@@ -29,8 +29,6 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     @EntityGraph(attributePaths = {"room", "tenant"})
     List<Contract> findByTenantIdAndStatusIn(Long tenantId, List<ContractStatus> statuses);
 
-    long countByRoomIdAndStatusInAndIdNot(Long roomId, List<ContractStatus> statuses, Long id);
-
     @Query("SELECT COUNT(c) FROM Contract c WHERE c.status = :status")
     long countActiveContracts(ContractStatus status);
 }
