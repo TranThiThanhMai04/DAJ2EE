@@ -10,6 +10,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+
 @Controller
 public class HomeController {
 
@@ -50,5 +57,21 @@ public class HomeController {
 
         model.addAttribute("totalUnpaid", "1.200.000 đ");
         return "tenant/index";
+    }
+
+    private boolean isPendingPayment(Invoice invoice) {
+        if (invoice == null || invoice.getPaymentStatus() == null) {
+            return false;
+        }
+        return invoice.getPaymentStatus() == PaymentStatus.UNPAID
+                || invoice.getPaymentStatus() == PaymentStatus.OVERDUE;
+    }
+
+    private String formatCurrency(BigDecimal amount) {
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+        numberFormat.setMaximumFractionDigits(0);
+        numberFormat.setMinimumFractionDigits(0);
+        BigDecimal safeAmount = amount != null ? amount : BigDecimal.ZERO;
+        return numberFormat.format(safeAmount) + " đ";
     }
 }
