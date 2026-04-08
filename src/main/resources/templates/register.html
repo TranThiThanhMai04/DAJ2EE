@@ -8,54 +8,109 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-7 col-lg-6">
-                <div class="card glass-card-login border-0 p-4 shadow-lg">
+                <div class="card glass-card-login border-0 p-4 shadow-lg animate-fade-in">
                     <div class="card-body">
                         <div class="text-center mb-4">
                             <h2 class="fw-bold text-white">ĐĂNG KÝ TÀI KHOẢN</h2>
                             <p class="text-white-50 small">Vui lòng điền chính xác thông tin để làm hợp đồng</p>
                         </div>
 
-                        <form th:action="@{/register}" method="post">
+                        <!-- Hiện lỗi chung (mật khẩu không khớp, SĐT trùng...) -->
+                        <div th:if="${errorMessage}" class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white small text-center mb-3">
+                            <span th:text="${errorMessage}"></span>
+                        </div>
+
+                        <!-- Hiện thông báo đăng ký thành công (khi chờ duyệt) -->
+                        <div th:if="${successMessage}" class="alert alert-success bg-success bg-opacity-25 border-0 text-white small text-center mb-3">
+                            <span th:text="${successMessage}"></span>
+                        </div>
+                        <!--
+                            th:object="${registerForm}" → gắn DTO vào form
+                            th:field="*{phone}" → tự điền name="phone", id="phone", value từ DTO
+                            th:errors="*{phone}" → hiện thông báo lỗi của field phone
+                        -->
+                        <form th:action="@{/register}" th:object="${registerForm}" method="post">
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-white">Họ và Tên</label>
-                                    <input type="text" name="fullName" class="form-control border-0 bg-white bg-opacity-10 text-white" placeholder="Nguyễn Văn A" required>
+                                    <input type="text" th:field="*{fullName}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="Nguyễn Văn A">
+                                    <!-- Hiện lỗi validation của field fullName -->
+                                    <small th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"
+                                           class="text-warning"></small>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label small fw-bold text-white">Số điện thoại</label>
-                                    <input type="text" name="phone" class="form-control border-0 bg-white bg-opacity-10 text-white" placeholder="09xx..." required>
+                                    <label class="form-label small fw-bold text-white">Số điện thoại (dùng để đăng nhập)</label>
+                                    <input type="text" th:field="*{phone}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="09xx...">
+                                    <small th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"
+                                           class="text-warning"></small>
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-white">Email</label>
-                                    <input type="email" name="email" class="form-control border-0 bg-white bg-opacity-10 text-white" placeholder="vi-du@gmail.com" required>
+                                    <input type="email" th:field="*{email}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="vi-du@gmail.com">
+                                    <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                                           class="text-warning"></small>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-white">Số CCCD (12 số)</label>
-                                    <input type="text" name="cccd" class="form-control border-0 bg-white bg-opacity-10 text-white" placeholder="040..." required>
+                                    <input type="text" th:field="*{cccd}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="040...">
+                                    <small th:if="${#fields.hasErrors('cccd')}" th:errors="*{cccd}"
+                                           class="text-warning"></small>
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-white">Mật khẩu</label>
-                                    <input type="password" name="password" class="form-control border-0 bg-white bg-opacity-10 text-white" required>
+                                    <input type="password" th:field="*{password}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="Tối thiểu 8 ký tự">
+                                    <small th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
+                                           class="text-warning"></small>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label small fw-bold text-white">Xác nhận mật khẩu</label>
-                                    <input type="password" name="confirmPassword" class="form-control border-0 bg-white bg-opacity-10 text-white" required>
+                                    <input type="password" th:field="*{confirmPassword}"
+                                           class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                           placeholder="Nhập lại mật khẩu">
+                                    <small th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"
+                                           class="text-warning"></small>
                                 </div>
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label small fw-bold text-white">Mã phòng dự kiến (Nếu có)</label>
-                                <input type="text" name="roomNumber" class="form-control border-0 bg-white bg-opacity-10 text-white" placeholder="Ví dụ: A-101">
+                                <input type="text" th:field="*{roomNumber}"
+                                       class="form-control border-0 bg-white bg-opacity-10 text-white"
+                                       placeholder="Ví dụ: A-101">
                             </div>
 
                             <button type="submit" class="btn btn-gradient w-100 py-2 fw-bold shadow">HOÀN TẤT ĐĂNG KÝ</button>
                         </form>
+
+                        <div class="position-relative my-4 text-center">
+                            <hr class="text-white-50">
+                            <span class="position-absolute top-50 start-50 translate-middle bg-transparent px-2 text-white-50 small">HOẶC</span>
+                        </div>
+
+                        <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-light w-100 rounded-pill py-2 small fw-bold shadow-sm mb-3">
+                            <img src="https://www.google.com/favicon.ico" width="16" class="me-2"> Đăng ký nhanh bằng Google
+                        </a>
+
+                        <div class="alert alert-info bg-info bg-opacity-10 border-0 text-white small mt-2">
+                            Tài khoản tạo bằng Google sẽ ở trạng thái chờ phê duyệt (enabled = false). Ban Quản Lý sẽ xác minh và bổ sung CCCD trước khi kích hoạt.
+                        </div>
 
                         <div class="text-center mt-4">
                             <span class="small text-white-50">Đã có tài khoản?</span>

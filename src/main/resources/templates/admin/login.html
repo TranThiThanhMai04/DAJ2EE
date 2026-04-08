@@ -15,6 +15,11 @@
                             <p class="small text-white-50">Hệ thống quản lý căn hộ 2026</p>
                         </div>
                         
+                        <!-- Thông báo lỗi nếu đăng nhập thất bại -->
+                        <div th:if="${param.error}" class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white small text-center mb-3">
+                            Tài khoản Admin hoặc mật khẩu không chính xác.
+                        </div>
+                        
                         <form th:action="@{/login}" method="post">
                             <div class="form-floating mb-3 text-dark">
                                 <input type="text" name="username" class="form-control border-0 bg-white bg-opacity-75" id="adminUser" placeholder="Admin ID" required>

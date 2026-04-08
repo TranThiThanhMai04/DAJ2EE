@@ -1,0 +1,351 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+  <head>
+    <!-- Kế thừa head chung (Title, Bootstrap, CSS gốc) -->
+    <th:block th:replace="~{layouts/fragments :: html_head}"></th:block>
+    <title>Phê duyệt cư dân | Quản trị hiện đại</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../static/css/pending.css" />
+    <!-- Cấu hình bảo mật CSRF -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <style>
+      * {
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      body {
+        background: radial-gradient(circle at 20% 30%, #0f172a, #030712);
+      }
+      .glass-panel {
+        background: rgba(15, 25, 35, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 2rem;
+        box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.5);
+      }
+      .glass-card-hover {
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .glass-card-hover:hover {
+        background: rgba(59, 130, 246, 0.05);
+      }
+      /* Tùy chỉnh popup SweetAlert2 cho hợp Dark mode */
+      .swal2-popup.swal-dark {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
+      }
+      .swal2-title {
+        color: #f8fafc !important;
+      }
+    </style>
+  </head>
+
+  <body class="theme-force-modern text-gray-100 overflow-hidden h-screen">
+    <div class="flex h-full w-full">
+      <div
+        th:replace="~{layouts/fragments :: admin_sidebar}"
+        class="hidden md:block shrink-0"
+      ></div>
+
+      <div class="flex-1 overflow-y-auto p-5 lg:p-8">
+        <div class="flex flex-wrap items-center justify-between gap-5 mb-8">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-12 h-12 rounded-2xl bg-orange-500/20 backdrop-blur-sm flex items-center justify-center border border-orange-500/30"
+            >
+              <i class="fas fa-user-clock text-2xl text-orange-400"></i>
+            </div>
+            <div>
+              <h1
+                class="text-3xl lg:text-4xl font-black bg-gradient-to-r from-white via-orange-100 to-orange-300 bg-clip-text text-transparent"
+              >
+                Phê duyệt cư dân mới
+              </h1>
+              <p class="text-slate-400 text-sm mt-1">
+                Quản lý các tài khoản vừa đăng ký chờ cấp quyền
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel w-full overflow-hidden">
+          <div
+            class="px-6 py-5 border-b border-white/10 bg-white/5 flex items-center gap-3"
+          >
+            <div
+              class="w-1.5 h-7 bg-gradient-to-b from-orange-400 to-red-500 rounded-full"
+            ></div>
+            <h2 class="text-xl font-bold">Danh sách chờ duyệt</h2>
+            <span
+              class="text-xs bg-red-500/20 text-red-300 rounded-full px-3 py-1 font-mono"
+              th:text="${#lists.size(pendingUsers)} + ' yêu cầu'"
+            ></span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-white/5">
+                  <th
+                    class="px-6 py-4 text-xs font-bold uppercase text-slate-400"
+                  >
+                    Cư dân
+                  </th>
+                  <th
+                    class="px-6 py-4 text-xs font-bold uppercase text-slate-400"
+                  >
+                    Liên hệ
+                  </th>
+                  <th
+                    class="px-6 py-4 text-xs font-bold uppercase text-slate-400 text-center"
+                  >
+                    Trạng thái
+                  </th>
+                  <th
+                    class="px-6 py-4 text-xs font-bold uppercase text-slate-400 text-right"
+                  >
+                    Hành động
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  th:each="user : ${pendingUsers}"
+                  class="glass-card-hover group"
+                >
+                  <td class="px-6 py-5">
+                    <div
+                      class="font-bold text-white text-base"
+                      th:text="${user.fullName}"
+                    >
+                      Tên cư dân
+                    </div>
+                  </td>
+                  <td class="px-6 py-5 text-sm text-slate-400">
+                    <div>
+                      <i class="fas fa-envelope mr-2"></i
+                      ><span th:text="${user.email}"></span>
+                    </div>
+                    <!-- Sửa user.phone thành user.username vì Entity chỉ dùng username lưu số điện thoại -->
+                    <div class="mt-1">
+                      <i class="fas fa-phone mr-2"></i
+                      ><span th:text="${user.username}"></span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-5 text-center">
+                    <span
+                      class="bg-orange-500/20 text-orange-300 px-3 py-1 rounded-full text-xs font-bold border border-orange-500/30"
+                    >
+                      <i class="fas fa-hourglass-half mr-1"></i> Chờ duyệt
+                    </span>
+                  </td>
+                  <td class="px-6 py-5 text-right">
+                    <div class="flex justify-end gap-2">
+                      <button
+                        th:onclick="'handleAction(' + ${user.id} + ', \'approve\')'"
+                        class="bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl transition"
+                      >
+                        <i class="fas fa-check"></i> Duyệt
+                      </button>
+                      <button
+                        th:onclick="'handleAction(' + ${user.id} + ', \'reject\')'"
+                        class="bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 px-3 py-2 rounded-xl transition"
+                      >
+                        <i class="fas fa-trash-alt"></i> Từ chối
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(pendingUsers)}">
+                  <td colspan="4" class="px-6 py-12 text-center text-slate-400">
+                    <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+                    <p>Hiện không có tài khoản nào chờ duyệt.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+
+    <script th:inline="javascript">
+      function handleAction(userId, action) {
+        const isApprove = action === "approve";
+
+        if (isApprove) {
+          // Trường hợp PHÊ DUYỆT: Hiện Modal tùy chỉnh HTML
+          Swal.fire({
+            title: "Hoàn tất hồ sơ cư dân",
+            html: `
+                    <div class="text-left">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Số CCCD (12 chữ số)</label>
+                            <input id="swal-cccd" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none" maxlength="12" placeholder="Nhập 12 chữ số...">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Giới tính</label>
+                            <div class="flex gap-4 mt-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="swal-gender" value="MALE" checked class="mr-2 accent-emerald-500"> Nam
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="swal-gender" value="FEMALE" class="mr-2 accent-emerald-500"> Nữ
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Quê quán (Tỉnh/Thành phố)</label>
+                            <select id="swal-hometown" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <option value="">Đang tải danh sách...</option>
+                            </select>
+                        </div>
+                    </div>
+                `,
+            showCancelButton: true,
+            confirmButtonText: "Xác nhận Duyệt",
+            cancelButtonText: "Hủy",
+            confirmButtonColor: "#10b981",
+            customClass: { popup: "swal-dark" },
+            didOpen: () => {
+              // Fetch tỉnh thành khi modal mở
+              const provinceSelect = document.getElementById("swal-hometown");
+              fetch("https://provinces.open-api.vn/api/p/")
+                .then((res) => res.json())
+                .then((provinces) => {
+                  provinceSelect.innerHTML =
+                    '<option value="">-- Chọn Tỉnh/Thành phố --</option>';
+                  provinces.forEach((p) => {
+                    const option = document.createElement("option");
+                    option.value = p.name;
+                    option.textContent = p.name;
+                    provinceSelect.appendChild(option);
+                  });
+                })
+                .catch((err) => {
+                  provinceSelect.innerHTML =
+                    '<option value="">Lỗi tải dữ liệu!</option>';
+                  console.error("Fetch error:", err);
+                });
+            },
+            preConfirm: () => {
+              const cccd = document.getElementById("swal-cccd").value;
+              const gender = document.querySelector(
+                'input[name="swal-gender"]:checked',
+              ).value;
+              const hometown = document.getElementById("swal-hometown").value;
+
+              if (!cccd || !/^\d{12}$/.test(cccd)) {
+                Swal.showValidationMessage("CCCD phải bao gồm đúng 12 chữ số!");
+                return false;
+              }
+              if (!hometown) {
+                Swal.showValidationMessage("Vui lòng chọn Quê quán!");
+                return false;
+              }
+
+              return { cccd, gender, hometown };
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              executeApiCall(
+                `/admin/api/users/approve/${userId}`,
+                "POST",
+                result.value,
+              );
+            }
+          });
+        } else {
+          // Trường hợp TỪ CHỐI: Hiện cảnh báo xóa
+          Swal.fire({
+            title: "Từ chối tài khoản?",
+            text: "Tài khoản này sẽ bị xóa khỏi hệ thống vĩnh viễn.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#475569",
+            confirmButtonText: "Đồng ý xóa",
+            cancelButtonText: "Hủy",
+            customClass: { popup: "swal-dark" },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              executeApiCall(
+                `/admin/api/users/reject/${userId}`,
+                "DELETE",
+                null,
+              );
+            }
+          });
+        }
+      }
+
+      // Hàm phụ trợ để gọi API và hiển thị kết quả
+      function executeApiCall(url, method, bodyData) {
+        const token = document
+          .querySelector("meta[name='_csrf']")
+          .getAttribute("content");
+        const header = document
+          .querySelector("meta[name='_csrf_header']")
+          .getAttribute("content");
+
+        const options = {
+          method: method,
+          headers: {
+            [header]: token,
+            "Content-Type": "application/json",
+          },
+        };
+
+        if (bodyData) {
+          options.body = JSON.stringify(bodyData);
+        }
+
+        fetch(url, options)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              Swal.fire({
+                title: "Thành công!",
+                text: data.message,
+                icon: "success",
+                customClass: { popup: "swal-dark" },
+                timer: 1500,
+                showConfirmButton: false,
+              }).then(() => location.reload());
+            } else {
+              Swal.fire("Lỗi!", data.message, "error");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire("Lỗi kết nối!", "Không thể xử lý yêu cầu.", "error");
+          });
+      }
+    </script>
+  </body>
+</html>
