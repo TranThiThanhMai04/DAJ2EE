@@ -94,9 +94,15 @@
             const btn = this.querySelector('button');
             btn.disabled = true;
 
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
             fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
                 body: JSON.stringify(payload)
             }).then(res => {
                 if(res.ok) {
@@ -104,8 +110,14 @@
                     this.reset();
                     document.getElementById('roomSelection').classList.add('d-none');
                 } else {
-                    Swal.fire('Thất bại', 'Có lỗi xảy ra.', 'error');
+                    res.text().then(text => {
+                        console.error('Server response:', text);
+                        Swal.fire('Thất bại', 'Có lỗi xảy ra: ' + (text || res.status), 'error');
+                    });
                 }
+            }).catch(err => {
+                console.error('Fetch error:', err);
+                Swal.fire('Thất bại', 'Lỗi kết nối: ' + err.message, 'error');
             }).finally(() => {
                 btn.disabled = false;
             });

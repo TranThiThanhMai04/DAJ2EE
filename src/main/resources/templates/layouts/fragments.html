@@ -3,9 +3,11 @@
 <head th:fragment="html_head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Hệ thống Quản lý Chung cư</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSS Bootstrap & FontAwesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -42,34 +44,31 @@
             <a href="/admin/index"><i class="fas fa-chart-line me-2"></i>Tổng quan</a>
         </li>
         <li sec:authorize="hasRole('ADMIN')">
-            <a href="/admin/permissions"><i class="fas fa-user-lock me-2"></i>Phân quyền (Mới)</a>
+            <a href="/admin/permissions"><i class="fas fa-user-lock me-2"></i>Phân quyền</a>
         </li>
         <li>
             <a href="/admin/pending-approvals"><i class="fas fa-user-clock me-2"></i>Phê duyệt cư dân</a>   
         </li>
         <li sec:authorize="hasAuthority('OP_EDIT_ROOM')">
-            <a href="/admin/rooms"><i class="fas fa-door-open me-2"></i>Quản lý Phòng (Mạnh)</a>
+            <a href="/admin/rooms"><i class="fas fa-door-open me-2"></i>Quản lý Phòng</a>
         </li>
         <li>
-            <a href="/admin/tenants"><i class="fas fa-users me-2"></i>Khách thuê (Minh)</a>
+            <a href="/admin/tenants"><i class="fas fa-users me-2"></i>Khách thuê</a>
         </li>
         <li>
-            <a href="/admin/contracts"><i class="fas fa-file-signature me-2"></i>Quản lý Hợp đồng (Minh)</a>
-        </li>
-        <li>
-            <a href="/admin/services"><i class="fas fa-bolt me-2"></i>Điện & Nước (Mai)</a>
+            <a href="/admin/contracts"><i class="fas fa-file-signature me-2"></i>Quản lý Hợp đồng</a>
         </li>
         <li sec:authorize="hasAuthority('OP_EDIT_INVOICE')">
-            <a href="/admin/invoices"><i class="fas fa-file-invoice-dollar me-2"></i>Hóa đơn (Liễu)</a>
+            <a href="/admin/invoices"><i class="fas fa-file-invoice-dollar me-2"></i>Hóa đơn</a>
         </li>
         <li>
-            <a href="/admin/debts"><i class="fas fa-exclamation-circle me-2"></i>Công nợ (Hằng)</a>
+            <a href="/admin/debts"><i class="fas fa-exclamation-circle me-2"></i>Công nợ</a>
         </li>
         <li>
-            <a href="/admin/maintenance"><i class="fas fa-tools me-2"></i>Sửa chữa (Quân)</a>
+            <a href="/admin/maintenance"><i class="fas fa-tools me-2"></i>Sửa chữa</a>
         </li>
         <li sec:authorize="hasAuthority('OP_VIEW_REPORT')">
-            <a href="/admin/reports"><i class="fas fa-poll me-2"></i>Báo cáo (Liêu)</a>
+            <a href="/admin/reports"><i class="fas fa-poll me-2"></i>Báo cáo</a>
         </li>
 
         <div sec:authorize="hasRole('ADMIN')">
@@ -103,6 +102,9 @@
         </li>
         <li>
             <a href="/tenant/maintenance"><i class="fas fa-tools me-2"></i>Báo cáo sự cố</a>
+        </li>
+        <li>
+            <a href="/tenant/notifications"><i class="fas fa-bell me-2"></i>Thông báo</a>
         </li>
         <li>
             <a href="/tenant/profile"><i class="fas fa-user-circle me-2"></i>Thông tin cá nhân</a>

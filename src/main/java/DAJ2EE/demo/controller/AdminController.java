@@ -28,6 +28,9 @@ public class AdminController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private DAJ2EE.demo.service.AuditLogService auditLogService;
+
     /**
      * Hiển thị trang Quản lý Phân quyền.
      * 
@@ -50,6 +53,7 @@ public class AdminController {
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
             userService.updateUserRole(userId, roleId);
+            auditLogService.log("Cập nhật Vai trò", "Đã cập nhật vai trò cho người dùng ID: " + userId + " sang Role ID: " + roleId);
             return "redirect:/admin/permissions?success";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -69,6 +73,7 @@ public class AdminController {
             boolean enabled = (boolean) payload.get("enabled");
 
             userService.updateUserPermission(userId, permissionName, enabled);
+            auditLogService.log("Cập nhật Quyền hạn", (enabled ? "Cấp" : "Thu hồi") + " quyền '" + permissionName + "' cho người dùng ID: " + userId);
 
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
@@ -156,6 +161,7 @@ public class AdminController {
             user.setStatus(1); // 1 = Active
             
             userRepository.save(user);
+            auditLogService.log("Phê duyệt cư dân", "Đã phê duyệt và cập nhật hồ sơ cho cư dân: " + user.getFullName() + " (ID: " + id + ")");
 
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
@@ -180,6 +186,7 @@ public class AdminController {
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id));
             
             userRepository.delete(user);
+            auditLogService.log("Từ chối cư dân", "Đã từ chối và xóa tài khoản đang chờ duyệt: " + user.getFullName() + " (ID: " + id + ")");
 
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");

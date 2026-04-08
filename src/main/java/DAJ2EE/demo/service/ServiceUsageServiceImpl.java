@@ -44,8 +44,19 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                 .orElseGet(() -> {
                     DAJ2EE.demo.entity.Service newService = new DAJ2EE.demo.entity.Service();
                     newService.setName(serviceName);
+                    newService.setServiceName(serviceName);
                     newService.setUnit(serviceName.equalsIgnoreCase("Điện") ? "kWh" : "m3");
-                    newService.setPricePerUnit(java.math.BigDecimal.ZERO); // Default
+                    // Set default prices: Điện = 3500, Nước = 15000
+                    if (serviceName.equalsIgnoreCase("Điện")) {
+                        newService.setPricePerUnit(new java.math.BigDecimal("3500"));
+                        newService.setPricePerUnitAlt(new java.math.BigDecimal("3500"));
+                    } else if (serviceName.equalsIgnoreCase("Nước")) {
+                        newService.setPricePerUnit(new java.math.BigDecimal("15000"));
+                        newService.setPricePerUnitAlt(new java.math.BigDecimal("15000"));
+                    } else {
+                        newService.setPricePerUnit(java.math.BigDecimal.ZERO);
+                        newService.setPricePerUnitAlt(java.math.BigDecimal.ZERO);
+                    }
                     return serviceRepository.save(newService);
                 });
 
@@ -81,8 +92,14 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
         usage.setCurrentReading(reading);
         usage.setPreviousReading(usage.getOldValue() == null ? 0 : usage.getOldValue());
 
+        // Validate: chỉ số mới phải >= chỉ số cũ
+        int oldVal = usage.getOldValue() == null ? 0 : usage.getOldValue();
+        if (reading < oldVal) {
+            throw new RuntimeException("Chỉ số " + serviceName + " mới (" + reading + ") không được nhỏ hơn chỉ số cũ (" + oldVal + ")!");
+        }
+
         // compute billing amount = (new - old) * pricePerUnit
-        int diff = usage.getNewValue() - (usage.getOldValue() == null ? 0 : usage.getOldValue());
+        int diff = usage.getNewValue() - oldVal;
         java.math.BigDecimal price = service.getPricePerUnit() == null ? java.math.BigDecimal.ZERO : service.getPricePerUnit();
         java.math.BigDecimal amount = price.multiply(java.math.BigDecimal.valueOf(diff));
         usage.setAmount(amount);
@@ -106,5 +123,22 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
     @Override
     public List<ServiceUsage> getUsageByRoom(Long roomId) {
         return serviceUsageRepository.findByRoomId(roomId);
+    }
+
+    @Override
+    public List<DAJ2EE.demo.entity.Service> getAllServices() {
+        return serviceRepository.findAll();
+    }
+
+    @Override
+    public Integer getLatestReadingBefore(Long roomId, String serviceName, Integer month, Integer year) {
+        Room room = roomRepository.findById(roomId).orElse(null);
+        DAJ2EE.demo.entity.Service service = serviceRepository.findByName(serviceName).orElse(null);
+        
+        if (room == null || service == null) return 0;
+        
+        return serviceUsageRepository.findLatestBefore(room, service, month, year)
+                .map(ServiceUsage::getNewValue)
+                .orElse(0);
     }
 }

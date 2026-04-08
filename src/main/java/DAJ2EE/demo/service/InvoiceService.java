@@ -5,7 +5,7 @@ import DAJ2EE.demo.entity.Invoice;
 import java.util.List;
 
 public interface InvoiceService {
-    Invoice createMonthlyInvoice(Long roomId, int month, int year);
+    Invoice createMonthlyInvoice(Long roomId, int month, int year, Integer elecReading, Integer waterReading, java.math.BigDecimal otherFees);
     List<Invoice> getAllInvoices();
     List<Invoice> getInvoicesByRoom(Long roomId);
     List<Invoice> getInvoicesByTenant(Long tenantId);

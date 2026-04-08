@@ -2,6 +2,7 @@ package DAJ2EE.demo.controller;
 
 import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.repository.UserRepository;
+import DAJ2EE.demo.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,9 @@ public class HomeController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/")
     public String index() {
@@ -33,7 +37,15 @@ public class HomeController {
         if (identifier != null) {
             userRepository.findByUsernameOrEmail(identifier, identifier).ifPresent(u -> {
                 model.addAttribute("fullName", u.getFullName());
+                // Load thông báo thực từ database
+                model.addAttribute("notifications", notificationService.getNotificationsForUser(u.getId()));
+                model.addAttribute("unreadCount", notificationService.countUnread(u.getId()));
             });
+        }
+
+        // Fallback nếu không load được
+        if (!model.containsAttribute("notifications")) {
+            model.addAttribute("notifications", java.util.Collections.emptyList());
         }
 
         model.addAttribute("totalUnpaid", "1.200.000 đ");

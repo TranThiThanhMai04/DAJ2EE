@@ -4,7 +4,6 @@ import DAJ2EE.demo.entity.Notification;
 import DAJ2EE.demo.entity.User;
 import DAJ2EE.demo.repository.NotificationRepository;
 import DAJ2EE.demo.repository.UserRepository;
-import DAJ2EE.demo.repository.RoomRepository;
 import DAJ2EE.demo.repository.ContractRepository;
 import DAJ2EE.demo.entity.Contract;
 import DAJ2EE.demo.entity.ContractStatus;
@@ -53,8 +52,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void sendNotificationToRoom(Long roomId, String title, String content) {
-        // Tìm hợp đồng còn hiệu lực cho phòng này để lấy người thuê
-        List<Contract> contracts = contractRepository.findByRoomIdAndStatus(roomId, ContractStatus.ACTIVE);
+        // Tìm hợp đồng còn hiệu lực (ACTIVE hoặc PENDING) cho phòng này để lấy người thuê
+        java.util.List<ContractStatus> validStatuses = java.util.Arrays.asList(ContractStatus.ACTIVE, ContractStatus.PENDING);
+        List<Contract> contracts = contractRepository.findByRoomIdAndStatusIn(roomId, validStatuses);
         if (!contracts.isEmpty()) {
             User tenant = contracts.get(0).getTenant();
             if (tenant != null) {

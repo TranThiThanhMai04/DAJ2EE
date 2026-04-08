@@ -16,6 +16,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Lấy danh sách toàn bộ người dùng thuộc 1 vai trò nhất định
     List<User> findByRoleName(String roleName);
 
+    // Lấy danh sách người dùng thuộc 1 vai trò và ĐÃ được duyệt
+    List<User> findByRoleNameAndEnabledTrue(String roleName);
+
     // Đếm số lượng người dùng theo tên Vai trò
     long countByRoleName(String roleName);
 

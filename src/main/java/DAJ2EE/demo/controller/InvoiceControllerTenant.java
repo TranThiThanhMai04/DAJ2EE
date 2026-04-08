@@ -28,13 +28,18 @@ public class InvoiceControllerTenant {
         User user = userService.findByUsername(userDetails.getUsername());
         List<Invoice> invoices = invoiceService.getInvoicesByTenant(user.getId());
         model.addAttribute("invoices", invoices);
+        model.addAttribute("user", user);
+        model.addAttribute("fullName", user.getFullName());
         return "tenant/invoice-list";
     }
 
     @GetMapping("/{id}")
-    public String viewInvoice(@PathVariable("id") Long id, Model model) {
+    public String viewInvoice(@PathVariable("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.findByUsername(userDetails.getUsername());
         Invoice invoice = invoiceService.getInvoiceById(id);
         model.addAttribute("invoice", invoice);
+        model.addAttribute("user", user);
+        model.addAttribute("fullName", user.getFullName());
         
         // Fetch service usages for this room and month/year
         List<DAJ2EE.demo.entity.ServiceUsage> usages = 

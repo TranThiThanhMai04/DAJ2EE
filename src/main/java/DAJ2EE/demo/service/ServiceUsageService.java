@@ -8,4 +8,6 @@ public interface ServiceUsageService {
     List<ServiceUsage> getUsageByMonthAndYear(Integer month, Integer year);
     ServiceUsage saveUsage(Long roomId, String serviceName, Integer reading, Integer month, Integer year);
     List<ServiceUsage> getUsageByRoom(Long roomId);
+    List<DAJ2EE.demo.entity.Service> getAllServices();
+    Integer getLatestReadingBefore(Long roomId, String serviceName, Integer month, Integer year);
 }

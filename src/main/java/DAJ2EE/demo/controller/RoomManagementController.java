@@ -24,6 +24,9 @@ public class RoomManagementController {
     @Autowired
     private RoomService roomService;
 
+    @Autowired
+    private DAJ2EE.demo.service.AuditLogService auditLogService;
+
     @GetMapping
     public String listRooms(Model model) {
         model.addAttribute("rooms", roomService.getAllRooms());
@@ -53,6 +56,7 @@ public class RoomManagementController {
 
         try {
             roomService.createRoom(room);
+            auditLogService.log("Thêm mới phòng", "Đã thêm phòng số: " + room.getRoomNumber());
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm phòng thành công");
             return "redirect:/admin/rooms";
         } catch (IllegalArgumentException ex) {
@@ -85,6 +89,7 @@ public class RoomManagementController {
 
         try {
             roomService.updateRoom(id, room);
+            auditLogService.log("Cập nhật phòng", "Đã cập nhật thông tin phòng ID: " + id + " (Số phòng mới: " + room.getRoomNumber() + ")");
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật phòng thành công");
             return "redirect:/admin/rooms";
         } catch (IllegalArgumentException ex) {
@@ -98,6 +103,7 @@ public class RoomManagementController {
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('OP_DELETE_ROOM')")
     public String deleteRoom(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         roomService.deleteRoom(id);
+        auditLogService.log("Xóa phòng", "Đã xóa phòng có ID: " + id);
         redirectAttributes.addFlashAttribute("successMessage", "Đã xóa phòng thành công");
         return "redirect:/admin/rooms";
     }

@@ -185,7 +185,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllTenants() {
-        return userRepository.findByRoleName("ROLE_TENANT");
+        return userRepository.findByRoleNameAndEnabledTrue("ROLE_TENANT");
     }
 
     @Override

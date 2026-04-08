@@ -43,14 +43,28 @@
                 <div class="row">
                     <div class="col-md-7">
                         <div class="card glass-card shadow-sm mb-4">
-                            <div class="card-header bg-transparent fw-bold text-uppercase pt-3 border-0">
-                                <i class="fas fa-bullhorn me-2 text-danger"></i>Thông báo mới
+                            <div class="card-header bg-transparent fw-bold text-uppercase pt-3 border-0 d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-bullhorn me-2 text-danger"></i>Thông báo mới</span>
+                                <a href="/tenant/notifications" class="btn btn-sm btn-outline-primary rounded-pill px-3">Xem tất cả</a>
                             </div>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush bg-transparent">
-                                    <li class="list-group-item bg-transparent">
-                                        <h6 class="fw-bold mb-1">📢 Sắp sửa chữa điện nước</h6>
-                                        <p class="small text-muted mb-0">Hệ thống tầng 2 sẽ bảo trì vào 20/03/2026.</p>
+                                    <li th:each="notif : ${notifications}" class="list-group-item bg-transparent" 
+                                        th:classappend="${!notif.isRead} ? 'border-start border-primary border-3' : ''">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1">
+                                                    <span th:if="${!notif.isRead}" class="badge bg-danger me-1">Mới</span>
+                                                    📢 <span th:text="${notif.title}">Tiêu đề</span>
+                                                </h6>
+                                                <p class="small text-muted mb-0" th:text="${notif.content}">Nội dung</p>
+                                                <small class="text-secondary"><i class="far fa-clock me-1"></i><span th:text="${#temporals.format(notif.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</span></small>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li th:if="${#lists.isEmpty(notifications)}" class="list-group-item bg-transparent text-center text-muted py-4">
+                                        <i class="fas fa-bell-slash fa-2x mb-2 d-block"></i>
+                                        Chưa có thông báo nào.
                                     </li>
                                 </ul>
                             </div>

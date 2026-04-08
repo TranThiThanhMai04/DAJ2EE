@@ -54,7 +54,7 @@ public class SecurityConfig {
         http
             .authenticationProvider(authenticationProvider()) // Gắn provider vào filter chain
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/admin/login", "/oauth2/**", "/login/oauth2/**").permitAll()
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/admin/login", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/tenant/**").hasRole("TENANT")
                 .anyRequest().authenticated()
@@ -74,6 +74,8 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
+                .logoutRequestMatcher(request -> "/logout".equals(request.getServletPath()) &&
+                    ("GET".equals(request.getMethod()) || "POST".equals(request.getMethod())))
                 .logoutSuccessUrl("/")
                 .permitAll()
             );
