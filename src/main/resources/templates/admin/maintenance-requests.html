@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head th:replace="~{layouts/fragments :: html_head}">
+    <title>Quản lý Sửa chữa</title>
+</head>
+<body>
+<div class="admin-wrapper">
+    <div th:replace="~{layouts/fragments :: admin_sidebar}"></div>
+
+    <div id="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded-3 mb-4">
+            <div class="container-fluid">
+                <span class="navbar-text fw-bold text-dark">Quản lý Yêu cầu Sửa chữa</span>
+            </div>
+        </nav>
+
+        <div th:if="${successDetails}" class="alert alert-success alert-dismissible fade show">
+            <span th:text="${successDetails}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorDetails}" class="alert alert-danger alert-dismissible fade show">
+            <span th:text="${errorDetails}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card glass-card border-0">
+            <div class="card-header bg-transparent border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-tools text-primary me-2"></i>Danh Sách Yêu Cầu</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>#Mã</th>
+                            <th>Phòng / Người gửi</th>
+                            <th>Mô tả sự cố</th>
+                            <th>Hình ảnh</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Cập nhật</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(requests)}">
+                            <td colspan="7" class="text-center text-muted py-4">Không có yêu cầu sửa chữa nào.</td>
+                        </tr>
+                        <tr th:each="r : ${requests}">
+                            <td class="fw-bold text-muted">#<span th:text="${r.id}"></span></td>
+                            <td>
+                                <div class="fw-bold text-primary" th:text="${r.room != null ? r.room.roomNumber : 'N/A'}">P101</div>
+                                <div class="small text-muted" th:text="${r.user != null ? r.user.fullName : 'Ẩn danh'}">Nguyễn Văn A</div>
+                            </td>
+                            <td>
+                                <div style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
+                                     th:title="${r.description}" th:text="${r.description}"></div>
+                            </td>
+                            <td>
+                                <a href="#" th:if="${r.imageUrl != null}" data-bs-toggle="modal" th:data-bs-target="'#imgModalAdmin' + ${r.id}">
+                                    <img th:src="@{${r.imageUrl}}" alt="thumb" class="rounded shadow-sm" style="width: 45px; height: 45px; object-fit: cover; border: 2px solid #fff;">
+                                </a>
+                                <span th:if="${r.imageUrl == null}" class="badge bg-light text-dark">Không có</span>
+
+                                <!-- Modal Image -->
+                                <div th:if="${r.imageUrl != null}" class="modal fade" th:id="'imgModalAdmin' + ${r.id}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                        <div class="modal-content border-0 shadow-lg">
+                                            <div class="modal-header border-0 pb-0 bg-light">
+                                                <h5 class="modal-title fw-bold">Chi tiết hình ảnh</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-center p-0">
+                                                <img th:src="@{${r.imageUrl}}" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;" alt="Evidence">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-muted small" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-2" 
+                                      th:classappend="${r.status.name() == 'PENDING'} ? 'bg-warning text-dark' : (${r.status.name() == 'PROCESSING'} ? 'bg-primary' : 'bg-success')"
+                                      th:text="${r.status.name() == 'PENDING'} ? 'Đang chờ' : (${r.status.name() == 'PROCESSING'} ? 'Đang sửa' : 'Hoàn thành')">
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <form th:if="${r.status.name() != 'DONE'}" th:action="@{'/admin/maintenance/' + ${r.id} + '/status'}" method="post" class="d-flex justify-content-end align-items-center">
+                                    <select name="status" class="form-select form-select-sm d-inline-block w-auto me-2">
+                                        <option value="PENDING" th:selected="${r.status.name() == 'PENDING'}" th:disabled="${r.status.name() != 'PENDING'}">Đang chờ</option>
+                                        <option value="PROCESSING" th:selected="${r.status.name() == 'PROCESSING'}" th:disabled="${r.status.name() == 'DONE'}">Đang sửa</option>
+                                        <option value="DONE">Hoàn thành</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+                                </form>
+                                <span th:if="${r.status.name() == 'DONE'}" class="text-success small fw-bold"><i class="fas fa-check-circle me-1"></i>Đã xong</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

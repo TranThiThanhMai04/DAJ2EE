@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+<head th:replace="~{layouts/fragments :: html_head}">
+    <title>Phân quyền | Quản trị hiện đại</title>
+</head>
+<!-- Google Fonts + Font Awesome -->
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+    rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<style>
+    * {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+        background: radial-gradient(circle at 20% 30%, #0f172a, #030712);
+    }
+
+    /* Glassmorphism core */
+    .glass-panel {
+        background: rgba(15, 25, 35, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 2rem;
+        box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-card-hover {
+        transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-card-hover:hover {
+        background: rgba(59, 130, 246, 0.08);
+        border-bottom-color: rgba(59, 130, 246, 0.4);
+        transform: translateY(-1px);
+    }
+
+    /* Modern toggle switch - elevated */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 56px;
+        height: 30px;
+        flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #334155;
+        transition: 0.25s ease-out;
+        border-radius: 40px;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 24px;
+        width: 24px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    input:checked+.toggle-slider {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    }
+
+    input:checked+.toggle-slider:before {
+        transform: translateX(26px);
+    }
+
+    input:disabled+.toggle-slider {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Role badges */
+    .role-badge {
+        backdrop-filter: blur(4px);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        transition: all 0.2s;
+    }
+
+    /* Custom scroll */
+    .custom-scroll::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 20px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: #3b82f6;
+        border-radius: 20px;
+    }
+
+    /* Dropdown menu */
+    .role-dropdown {
+        transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+        transform-origin: top left;
+    }
+
+    .group:hover .role-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+    }
+
+    /* avatar shimmer */
+    .avatar-glow {
+        background: linear-gradient(145deg, #4f46e5, #7c3aed);
+        box-shadow: 0 8px 20px -5px rgba(79, 70, 229, 0.4);
+    }
+
+    /* status ring */
+    .permission-cell {
+        transition: all 0.2s;
+    }
+
+    .permission-cell:hover .toggle-switch {
+        filter: drop-shadow(0 0 4px #3b82f6);
+    }
+</style>
+
+<body class="text-gray-100 overflow-hidden h-screen">
+
+    <div class="flex h-full w-full">
+        <!-- Sidebar placeholder (giữ nguyên layout cũ) -->
+        <div th:replace="~{layouts/fragments :: admin_sidebar}" class="hidden md:block shrink-0"></div>
+
+        <!-- Main content area -->
+        <div class="flex-1 overflow-y-auto custom-scroll p-5 lg:p-8">
+            <!-- Header với hiệu ứng nổi bật -->
+            <div class="flex flex-wrap items-center justify-between gap-5 mb-8">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-blue-500/20 backdrop-blur-sm flex items-center justify-center border border-blue-500/30 shadow-lg shadow-blue-500/10">
+                            <i class="fas fa-shield-hooded text-2xl text-blue-400"></i>
+                        </div>
+                        <div>
+                            <h1
+                                class="text-3xl lg:text-4xl font-black tracking-tight bg-gradient-to-r from-white via-blue-100 to-blue-300 bg-clip-text text-transparent">
+                                Phân quyền truy cập
+                            </h1>
+                            <p class="text-slate-400 text-sm mt-1 flex items-center gap-2">
+                                <i class="fas fa-fingerprint text-xs"></i> Thiết lập đặc quyền chi tiết cho từng thành
+                                viên
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="flex items-center gap-4 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">Phiên làm việc</span>
+                        <strong th:text="${fullName}"
+                            class="block text-base font-bold text-white">Administrator</strong>
+                    </div>
+                    <a href="/logout"
+                        class="bg-red-500/10 hover:bg-red-500/30 text-red-400 hover:text-red-200 w-10 h-10 flex items-center justify-center rounded-xl transition-all border border-red-500/30">
+                        <i class="fas fa-sign-out-alt text-lg"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Toast thông báo đẹp -->
+            <div id="toast-notify"
+                class="fixed top-6 right-6 z-50 hidden transform transition-all duration-300 ease-out">
+                <div
+                    class="flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 bg-slate-900/90">
+                    <i id="toast-icon" class="text-xl"></i>
+                    <span id="toast-message" class="font-medium text-sm">Thành công</span>
+                </div>
+            </div>
+
+            <!-- Main Card: Grid hiện đại -->
+            <div class="glass-panel w-full overflow-hidden">
+                <!-- Header tools -->
+                <div
+                    class="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-white/10 bg-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-7 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
+                        <h2 class="text-xl font-bold tracking-tight">Danh sách thành viên & quyền động</h2>
+                        <span class="text-xs bg-white/10 rounded-full px-3 py-1 font-mono"
+                            th:text="${#lists.size(users)} + ' người dùng'">4 users</span>
+                    </div>
+                    <button onclick="location.reload()"
+                        class="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl transition-all border border-white/10 shadow-md hover:shadow-blue-500/20">
+                        <i class="fas fa-arrows-rotate text-sm"></i>
+                        <span class="text-sm font-semibold">Đồng bộ</span>
+                    </button>
+                </div>
+
+                <!-- Responsive table nhưng dùng grid layout cho đẹp trên mobile + desktop (table đẹp) -->
+                <div class="overflow-x-auto custom-scroll">
+                    <table class="w-full text-left border-separate border-spacing-0">
+                        <thead>
+                            <tr class="bg-white/5 sticky top-0 z-10">
+                                <th
+                                    class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 rounded-tl-2xl">
+                                    Thành viên</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Vai trò
+                                </th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Chuyển
+                                    đổi vai trò</th>
+                                <th
+                                    class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+                                    ✎ Sửa hóa đơn</th>
+                                <th
+                                    class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+                                    🗑 Xóa phòng</th>
+                                <th
+                                    class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-center rounded-tr-2xl">
+                                    📊 Xem báo cáo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}" class="glass-card-hover transition-all duration-200 group">
+                                <!-- User info -->
+                                <td class="px-6 py-5 w-[30%]">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="h-12 w-12 rounded-2xl avatar-glow flex items-center justify-center text-white font-bold text-lg shadow-md ring-2 ring-white/20">
+                                            <span th:text="${#strings.substring(user.fullName,0,1)}">U</span>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-white text-base" th:text="${user.fullName}">
+                                                Nguyễn Thành</div>
+                                            <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                                                <i class="fas fa-envelope text-[10px]"></i>
+                                                <span th:text="${user.email}">user@domain.com</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                                                <i class="fas fa-phone-alt text-[10px]"></i>
+                                                <span th:text="${user.username}">+84 912345678</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <!-- Role badge -->
+                                <td class="px-6 py-5 w-[10%]">
+                                    <span th:if="${user.role.name == 'ROLE_ADMIN'}"
+                                        class="role-badge inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-black bg-gradient-to-r from-red-500/20 to-red-600/10 text-red-300 border border-red-500/40 shadow-sm">
+                                        <i class="fas fa-crown text-xs"></i> ADMIN
+                                    </span>
+                                    <span th:if="${user.role.name == 'ROLE_TENANT'}"
+                                        class="role-badge inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-black bg-gradient-to-r from-blue-500/20 to-cyan-500/10 text-blue-300 border border-blue-500/40 shadow-sm">
+                                        <i class="fas fa-home text-xs"></i> TENANT
+                                    </span>
+                                </td>
+                                <!-- Change Role Dropdown - Click-based (không dùng CSS hover để đảm bảo hoạt động) -->
+                                <td class="px-6 py-5 w-[15%]">
+                                    <div class="relative inline-block" th:id="'dropdown-wrapper-' + ${user.id}">
+                                        <!-- Nút Toggle: onclick gọi hàm toggleDropdown(userId) -->
+                                        <button type="button"
+                                            th:onclick="'toggleDropdown(' + ${user.id} + ')'"
+                                            class="flex items-center gap-2 bg-slate-800/70 hover:bg-slate-700/90 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border border-white/10 shadow-md">
+                                            <i class="fas fa-key text-blue-400 text-xs"></i>
+                                            <span>Thay đổi</span>
+                                            <i class="fas fa-angle-down text-xs text-slate-400" th:id="'chevron-' + ${user.id}"></i>
+                                        </button>
+
+                                        <!-- Menu con - mặc định hidden, toggle khi click nút trên -->
+                                        <div th:id="'role-menu-' + ${user.id}"
+                                            class="hidden absolute left-0 top-full mt-2 w-56 z-50">
+                                            <div class="rounded-2xl bg-slate-900 border border-white/15 shadow-2xl overflow-hidden">
+                                                <div class="flex flex-col">
+                                                    <!-- Lựa chọn: Đổi sang ADMIN -->
+                                                    <button type="button"
+                                                        th:onclick="'changeRoleAjax(' + ${user.id} + ', 1, \'ADMIN\')'"
+                                                        class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/10 transition-colors border-b border-white/5 w-full text-left">
+                                                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-md shadow-red-500/50"></span>
+                                                        <span class="font-bold text-white">Quản trị viên (ADMIN)</span>
+                                                    </button>
+                                                    <!-- Lựa chọn: Đổi sang TENANT -->
+                                                    <button type="button"
+                                                        th:onclick="'changeRoleAjax(' + ${user.id} + ', 2, \'TENANT\')'"
+                                                        class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/10 transition-colors w-full text-left">
+                                                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-md shadow-blue-500/50"></span>
+                                                        <span class="font-bold text-white">Cư dân (TENANT)</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <!-- Permission Toggles - Auto save -->
+                                <td class="px-6 py-5 text-center permission-cell w-[15%]">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" th:data-user-id="${user.id}"
+                                            data-permission="OP_EDIT_INVOICE"
+                                            th:checked="${user.role.name == 'ROLE_ADMIN' or #lists.contains(user.permissions.![name], 'OP_EDIT_INVOICE')}"
+                                            onchange="togglePermission(this)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="block text-[10px] font-mono mt-1.5 text-slate-500 tracking-wider">hóa
+                                        đơn</span>
+                                </td>
+                                <td class="px-6 py-5 text-center permission-cell w-[15%]">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" th:data-user-id="${user.id}"
+                                            data-permission="OP_DELETE_ROOM"
+                                            th:checked="${user.role.name == 'ROLE_ADMIN' or #lists.contains(user.permissions.![name], 'OP_DELETE_ROOM')}"
+                                            onchange="togglePermission(this)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="block text-[10px] font-mono mt-1.5 text-slate-500">phòng trọ</span>
+                                </td>
+                                <td class="px-6 py-5 text-center permission-cell w-[15%]">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" th:data-user-id="${user.id}"
+                                            data-permission="OP_VIEW_REPORT"
+                                            th:checked="${user.role.name == 'ROLE_ADMIN' or user.role.name == 'ROLE_TENANT' or #lists.contains(user.permissions.![name], 'OP_VIEW_REPORT')}"
+                                            onchange="togglePermission(this)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="block text-[10px] font-mono mt-1.5 text-slate-500">báo cáo</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer minh họa thông tin hệ thống -->
+                <div
+                    class="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-t border-white/10 bg-black/20 text-xs text-slate-400">
+                    <div class="flex items-center gap-5">
+                        <i class="fas fa-sync-alt text-blue-400/70 text-xs"></i>
+                        <span>Thay đổi quyền hạn có hiệu lực <strong class="text-white">ngay lập tức</strong> mà không
+                            cần reload</span>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="flex items-center gap-1.5"><span
+                                class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm"></span><span>Quản trị viên</span>
+                        </div>
+                        <div class="flex items-center gap-1.5"><span
+                                class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span><span>Cư dân</span></div>
+                        <div class="flex items-center gap-1.5"><i
+                                class="fas fa-lock text-[10px] text-emerald-400"></i><span>Phân quyền chi tiết</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phần mở rộng: Hệ thống & bảo mật (tiện ích nhanh) -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="glass-panel p-5 flex items-center justify-between transition hover:bg-white/5">
+                    <div>
+                        <h4 class="font-bold text-white text-sm">Phân quyền Role</h4>
+                        <p class="text-slate-400 text-xs mt-1">Quản lý vai trò nâng cao</p>
+                    </div>
+                    <i class="fas fa-user-tag text-2xl text-indigo-400/70"></i>
+                </div>
+                <div class="glass-panel p-5 flex items-center justify-between transition hover:bg-white/5">
+                    <div>
+                        <h4 class="font-bold text-white text-sm">Nhật ký hệ thống</h4>
+                        <p class="text-slate-400 text-xs mt-1">Theo dõi thay đổi quyền</p>
+                    </div>
+                    <i class="fas fa-history text-2xl text-cyan-400/70"></i>
+                </div>
+                <div class="glass-panel p-5 flex items-center justify-between transition hover:bg-white/5">
+                    <div>
+                        <h4 class="font-bold text-white text-sm">Cấu hình 2FA</h4>
+                        <p class="text-slate-400 text-xs mt-1">Bảo mật hai lớp</p>
+                    </div>
+                    <i class="fas fa-shield-alt text-2xl text-emerald-400/70"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // ============================================================
+        // TOAST NOTIFICATION MANAGER
+        // ============================================================
+        function showFancyToast(message, isError = false) {
+            const toastDiv   = document.getElementById('toast-notify');
+            const toastMsg   = document.getElementById('toast-message');
+            const toastIcon  = document.getElementById('toast-icon');
+            const toastInner = toastDiv.querySelector('div'); // div con đầu tiên
+
+            if (isError) {
+                toastIcon.className    = 'fas fa-circle-exclamation text-red-400 text-xl';
+                toastInner.style.borderLeft = '3px solid #ef4444';
+            } else {
+                toastIcon.className    = 'fas fa-check-circle text-emerald-400 text-xl';
+                toastInner.style.borderLeft = '3px solid #10b981';
+            }
+
+            toastMsg.innerText = message;
+            toastDiv.classList.remove('hidden');
+            toastDiv.style.opacity   = '0';
+            toastDiv.style.transform = 'translateX(30px)';
+
+            // Animate vào
+            setTimeout(function() {
+                toastDiv.style.transition = 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+                toastDiv.style.opacity    = '1';
+                toastDiv.style.transform  = 'translateX(0)';
+            }, 10);
+
+            // Tự ẩn sau 3.2 giây
+            setTimeout(function() {
+                toastDiv.style.opacity   = '0';
+                toastDiv.style.transform = 'translateX(30px)';
+                setTimeout(function() {
+                    toastDiv.classList.add('hidden');
+                    toastDiv.style.opacity   = '';
+                    toastDiv.style.transform = '';
+                }, 300);
+            }, 3200);
+        }
+
+        // ============================================================
+        // PERMISSION TOGGLE - Auto Save qua AJAX
+        // ============================================================
+
+        /**
+         * Gạt switch quyền hạn → tự động lưu ngay qua AJAX.
+         * @param {HTMLInputElement} checkbox - checkbox vừa được gạt
+         */
+        async function togglePermission(checkbox) {
+            const userId         = checkbox.getAttribute('data-user-id');
+            const permissionName = checkbox.getAttribute('data-permission');
+            const enabled        = checkbox.checked;
+
+            // Đọc CSRF token từ thẻ <meta> trong <head>
+            const csrfToken  = document.querySelector("meta[name='_csrf']").getAttribute('content');
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute('content');
+
+            try {
+                checkbox.disabled = true; // Khóa switch tạm thời khi đang gửi request
+
+                const response = await fetch('/admin/api/permissions/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken   // Đính kèm CSRF header
+                    },
+                    body: JSON.stringify({
+                        userId:         userId,
+                        permissionName: permissionName,
+                        enabled:        enabled
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showFancyToast(result.message);
+                } else {
+                    showFancyToast(result.message || 'Loi cap nhat quyen!', true);
+                    checkbox.checked = !enabled; // Hoàn tác UI nếu server trả lỗi
+                }
+            } catch (error) {
+                console.error('[togglePermission] Loi:', error);
+                showFancyToast('Khong the ket noi den may chu!', true);
+                checkbox.checked = !enabled;
+            } finally {
+                checkbox.disabled = false; // Mở khóa switch
+            }
+        }
+
+        // ============================================================
+        // DROPDOWN TOGGLE - Click-based (thay thế CSS :hover không ổn định)
+        // ============================================================
+
+        /** Đóng tất cả dropdown role đang mở trên trang */
+        function closeAllDropdowns() {
+            document.querySelectorAll('[id^="role-menu-"]').forEach(function(menu) {
+                menu.classList.add('hidden');
+            });
+            document.querySelectorAll('[id^="chevron-"]').forEach(function(icon) {
+                icon.style.transform  = 'rotate(0deg)';
+                icon.style.transition = 'transform 0.2s ease';
+            });
+        }
+
+        /**
+         * Toggle mở/đóng dropdown menu role của một user.
+         * @param {number} userId - ID của user cần toggle dropdown
+         */
+        function toggleDropdown(userId) {
+            var menu    = document.getElementById('role-menu-'  + userId);
+            var chevron = document.getElementById('chevron-' + userId);
+
+            if (!menu) return;
+
+            var isHidden = menu.classList.contains('hidden');
+            closeAllDropdowns(); // Đóng tất cả dropdown khác trước
+
+            if (isHidden) {
+                // Mở dropdown này
+                menu.classList.remove('hidden');
+                if (chevron) {
+                    chevron.style.transform  = 'rotate(180deg)';
+                    chevron.style.transition = 'transform 0.2s ease';
+                }
+            }
+        }
+
+        // Đóng tất cả dropdown khi user click ra ngoài vùng wrapper
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('[id^="dropdown-wrapper-"]')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // ============================================================
+        // CHANGE ROLE VIA AJAX (Fetch API + CSRF Token)
+        // ============================================================
+
+        /**
+         * Gửi request AJAX để thay đổi Role của một user.
+         *
+         * Cách lấy CSRF: Thymeleaf tự inject vào <meta> trong <head>:
+         *   <meta name="_csrf" th:content="${_csrf.token}"/>
+         *   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+         * JS đọc giá trị từ đó và đính kèm vào headers của request fetch.
+         *
+         * @param {number} userId   - ID của user cần đổi role
+         * @param {number} roleId   - ID của role mới (1=ADMIN, 2=TENANT)
+         * @param {string} roleName - Tên hiển thị để show trong toast
+         */
+        async function changeRoleAjax(userId, roleId, roleName) {
+            // Đóng dropdown ngay khi người dùng bấm chọn option
+            closeAllDropdowns();
+
+            // Hiển thị Popup cảnh báo xác nhận của SweetAlert2
+            const confirmResult = await Swal.fire({
+                title: 'Xác nhận thay đổi quyền?',
+                text: 'Bạn có chắc chắn muốn cấp quyền ' + roleName + ' cho người dùng này không? Hành động này có thể ảnh hưởng đến bảo mật hệ thống.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                background: '#1e293b',
+                color: '#fff'
+            });
+
+            // Mệnh đề thoát: Nếu user bấm "Hủy" hoặc đóng màn hình
+            if (!confirmResult.isConfirmed) {
+                return;
+            }
+
+            // === Đọc CSRF token từ <meta> — Thymeleaf đã inject khi render HTML ===
+            var csrfMetaEl   = document.querySelector("meta[name='_csrf']");
+            var csrfHeaderEl = document.querySelector("meta[name='_csrf_header']");
+
+            if (!csrfMetaEl || !csrfHeaderEl) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi bảo mật',
+                    text: 'Lỗi bảo mật CSRF - vui lòng tải lại trang!',
+                    background: '#1e293b',
+                    color: '#fff'
+                });
+                return;
+            }
+
+            var csrfToken  = csrfMetaEl.getAttribute('content');
+            var csrfHeader = csrfHeaderEl.getAttribute('content');
+
+            try {
+                // Gửi POST request với body JSON đến controller /admin/api/permissions/update-role
+                var response = await fetch('/admin/api/permissions/update-role', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken   // CSRF header - Spring Security yêu cầu
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        roleId: roleId
+                    })
+                });
+
+                var result = await response.json();
+
+                if (response.ok) {
+                    // Thành công: popup SweetAlert2 báo "Thành công", tự reload trang sau 1.5s
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: 'Đã cấp quyền ' + roleName + ' thành công!',
+                        showConfirmButton: false,
+                        timer: 1500, // 1.5 giây
+                        background: '#1e293b',
+                        color: '#fff'
+                    });
+                    
+                    setTimeout(function() { location.reload(); }, 1500);
+                } else {
+                    // Lỗi từ server (tự đổi quyền, hoặc vi phạm Admin cuối cùng) -> Báo lỗi icon error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Thất bại',
+                        text: result.message || 'Lỗi cập nhật vai trò!',
+                        background: '#1e293b',
+                        color: '#fff'
+                    });
+                }
+            } catch (error) {
+                // Lỗi mạng hoặc JSON parse thất bại
+                console.error('[changeRoleAjax] Lỗi:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi kết nối',
+                    text: 'Không thể kết nối đến máy chủ!',
+                    background: '#1e293b',
+                    color: '#fff'
+                });
+            }
+        }
+
+        // ============================================================
+        // INIT khi DOM sẵn sàng
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Glow effect cho switch đang bật khi load trang lần đầu
+            document.querySelectorAll('.toggle-switch input').forEach(function(sw) {
+                if (sw.checked && sw.nextElementSibling) {
+                    sw.nextElementSibling.style.boxShadow = '0 0 6px #3b82f6';
+                }
+                sw.addEventListener('change', function() {
+                    if (this.nextElementSibling) {
+                        this.nextElementSibling.style.boxShadow = this.checked
+                            ? '0 0 6px #3b82f6'
+                            : 'inset 0 1px 2px rgba(0,0,0,0.2)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -8,11 +8,26 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-5 col-lg-4">
-                <div class="card glass-card-login border-0 p-4 shadow-lg">
+                <div class="card glass-card-login border-0 p-4 shadow-lg animate-fade-in">
                     <div class="card-body">
                         <div class="text-center mb-4">
                             <h2 class="fw-bold text-white">ĐĂNG NHẬP</h2>
                             <p class="text-white-50 small">Dành cho cư dân Chung cư Mini</p>
+                        </div>
+
+                        <!-- Thông báo lỗi nếu đăng nhập thất bại -->
+                        <div th:if="${param.error}" class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white small text-center mb-3">
+                            Tài khoản hoặc mật khẩu không chính xác.
+                        </div>
+
+                        <!-- Thông báo lỗi nếu tài khoản chưa được duyệt (Disabled) -->
+                        <div th:if="${param.disabled}" class="alert alert-warning bg-warning bg-opacity-25 border-0 text-white small text-center mb-3">
+                            <i class="fas fa-clock me-1"></i> Tài khoản của bạn đang chờ Ban Quản Lý phê duyệt!
+                        </div>
+
+                        <!-- Thông báo đăng ký thành công -->
+                        <div th:if="${param.success}" class="alert alert-success bg-success bg-opacity-25 border-0 text-white small text-center mb-3">
+                            🎉 Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.
                         </div>
 
                         <form th:action="@{/login}" method="post">
