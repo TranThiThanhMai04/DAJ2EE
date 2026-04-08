@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -59,6 +60,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authenticationProvider(authenticationProvider()) // Gắn provider vào filter chain
+            .addFilterAfter(twoFactorEnforcementFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/admin/login", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -104,15 +106,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-        return (request, response, authentication) -> {
-            boolean isAdmin = authentication.getAuthorities().stream()
-                    .anyMatch(grant -> grant.getAuthority().equals("ROLE_ADMIN"));
-            if (isAdmin) {
-                response.sendRedirect("/admin");
-            } else {
-                response.sendRedirect("/tenant");
-            }
-        };
+        return twoFactorAuthenticationSuccessHandler;
     }
 
     @Bean
@@ -138,5 +132,14 @@ public class SecurityConfig {
             current = current.getCause();
         }
         return false;
+    }
+
+    private final DAJ2EE.demo.security.TwoFactorAuthenticationSuccessHandler twoFactorAuthenticationSuccessHandler;
+    private final DAJ2EE.demo.security.TwoFactorEnforcementFilter twoFactorEnforcementFilter;
+
+    public SecurityConfig(DAJ2EE.demo.security.TwoFactorAuthenticationSuccessHandler twoFactorAuthenticationSuccessHandler,
+                          DAJ2EE.demo.security.TwoFactorEnforcementFilter twoFactorEnforcementFilter) {
+        this.twoFactorAuthenticationSuccessHandler = twoFactorAuthenticationSuccessHandler;
+        this.twoFactorEnforcementFilter = twoFactorEnforcementFilter;
     }
 }
