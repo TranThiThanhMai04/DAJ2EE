@@ -1,24 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
-<head th:replace="~{layouts/fragments :: html_head}">
+  <head th:replace="~{layouts/fragments :: html_head}">
     <!-- CSS Bootstrap & FontAwesome cho Live Server (Preview) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../../static/css/style.css">
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../static/css/style.css" />
+  </head>
 
-<body>
+  <body class="tenant-portal">
     <div class="admin-wrapper">
-        <div th:replace="~{layouts/fragments :: tenant_sidebar}">
-            <!-- Xem trước khi code (Static preview) -->
-            <div id="sidebar" style="min-width: 280px; background: linear-gradient(180deg, #ff0080, #7928ca, #3333ff); height: 100vh; padding: 20px;">
-                <h4 style="color:white; font-weight: bold;"><i class="fas fa-building me-2"></i>Sidebar Preview</h4>
-                <ul class="list-unstyled mt-4" style="color: rgba(255,255,255,0.8);">
-                    <li class="mb-3"><i class="fas fa-home me-2"></i> Dashboard</li>
-                    <li class="mb-3"><i class="fas fa-file-invoice-dollar me-2"></i> Invoices</li>
-                </ul>
-            </div>
+      <div th:replace="~{layouts/fragments :: tenant_sidebar}">
+        <!-- Xem trước khi code (Static preview) -->
+        <div
+          id="sidebar"
+          style="
+            min-width: 280px;
+            background: linear-gradient(180deg, #ffffff, #f6f8fc);
+            height: 100vh;
+            padding: 20px;
+          "
+        >
+          <h4 style="color: #2a2d35; font-weight: 700">
+            <i class="bi bi-grid-1x2 me-2"></i>Sidebar Preview
+          </h4>
+          <ul class="list-unstyled mt-4" style="color: #4b5567">
+            <li class="mb-3">
+              <i class="bi bi-house-door me-2"></i> Dashboard
+            </li>
+            <li class="mb-3"><i class="bi bi-receipt me-2"></i> Invoices</li>
+          </ul>
         </div>
+      </div>
 
         <div id="content">
             <!-- Navbar top -->
@@ -81,10 +99,480 @@
                         </div>
                     </div>
                 </div>
+                <a
+                  href="/logout"
+                  class="btn btn-sm tenant-logout-btn"
+                  title="Đăng xuất"
+                  ><i class="bi bi-power"></i
+                ></a>
+              </div>
             </div>
+          </nav>
+
+          <div class="card tenant-welcome-card shadow-sm mb-5">
+            <div class="card-body px-4 px-md-5 py-4 py-md-5 text-center">
+              <p class="tenant-welcome-caption mb-2">Cổng thông tin cư dân</p>
+              <h2 class="tenant-welcome-title mb-3">
+                Xin chào, <span th:text="${fullName}">A</span>!
+              </h2>
+              <p class="tenant-welcome-desc mb-0">
+                Chào mừng bạn quay trở lại. Hãy kiểm tra các thông báo mới nhất
+                bên dưới.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="tenantDashboardRealtime"
+            class="row g-4 g-xl-5 align-items-stretch"
+          >
+            <div class="col-lg-7">
+              <div class="card tenant-card glass-card shadow-sm h-100">
+                <div
+                  class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center px-4 pt-4"
+                >
+                  <span class="tenant-card-title"
+                    ><i class="bi bi-megaphone tenant-accent-icon me-2"></i
+                    >Thông báo mới</span
+                  >
+                  <a
+                    href="/tenant/notifications"
+                    class="btn btn-sm tenant-flat-btn px-3"
+                    >Xem tất cả</a
+                  >
+                </div>
+                <div class="card-body px-0 pb-0">
+                  <ul
+                    class="list-group list-group-flush bg-transparent"
+                    id="tenantNotificationList"
+                  >
+                    <li
+                      th:each="notif : ${notifications}"
+                      class="list-group-item bg-transparent tenant-notif-item"
+                      th:classappend="${!notif.isRead} ? 'tenant-notif-unread' : ''"
+                    >
+                      <div class="d-flex align-items-start gap-3">
+                        <span class="tenant-notif-icon"
+                          ><i class="bi bi-newspaper"></i
+                        ></span>
+                        <div class="flex-grow-1">
+                          <h6
+                            class="fw-semibold mb-1 d-flex align-items-center"
+                          >
+                            <span
+                              th:if="${!notif.isRead}"
+                              class="badge tenant-badge-new me-2"
+                              >Mới</span
+                            >
+                            <span th:text="${notif.title}">Tiêu đề</span>
+                          </h6>
+                          <p
+                            class="small text-muted mb-1"
+                            th:text="${notif.content}"
+                          >
+                            Nội dung
+                          </p>
+                          <small class="text-secondary"
+                            ><i class="bi bi-clock me-1"></i
+                            ><span
+                              th:text="${#temporals.format(notif.createdAt, 'dd/MM/yyyy HH:mm')}"
+                              >01/01/2026</span
+                            ></small
+                          >
+                        </div>
+                      </div>
+                    </li>
+                    <li
+                      th:if="${#lists.isEmpty(notifications)}"
+                      id="tenantNotificationEmpty"
+                      class="list-group-item bg-transparent text-center text-muted py-5"
+                    >
+                      <i class="bi bi-bell-slash fs-1 mb-2 d-block"></i>
+                      Chưa có thông báo nào.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-5">
+              <div
+                class="card tenant-card tenant-invoice-card glass-card shadow-sm text-center p-4 p-xl-5 h-100"
+              >
+                <div class="tenant-wallet-icon mb-3">
+                  <i class="bi bi-wallet2"></i>
+                </div>
+                <h2
+                  class="tenant-invoice-amount fw-bold mb-2"
+                  th:text="${totalUnpaid}"
+                >
+                  1.200.000 đ
+                </h2>
+                <p class="text-muted tenant-invoice-label mb-4">
+                  Tổng nợ tháng này
+                </p>
+                <a
+                  th:if="${hasUnpaidInvoices}"
+                  th:href="${payNowUrl}"
+                  class="btn tenant-pay-btn w-100 fw-bold border-0"
+                  >YÊU CẦU THANH TOÁN NGAY</a
+                >
+                <span
+                  th:if="${!hasUnpaidInvoices and hasInvoices}"
+                  class="btn tenant-paid-btn w-100 fw-bold border-0 disabled"
+                  >ĐÃ THANH TOÁN</span
+                >
+                <span
+                  th:if="${!hasInvoices}"
+                  class="btn tenant-empty-btn w-100 fw-bold border-0 disabled"
+                  >CHƯA CÓ HÓA ĐƠN</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-4 g-xl-5 mt-1">
+            <div class="col-12">
+              <div class="card tenant-card glass-card shadow-sm">
+                <div
+                  class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center px-4 pt-4"
+                >
+                  <span class="tenant-card-title"
+                    ><i class="bi bi-graph-up-arrow tenant-accent-icon me-2"></i
+                    >Phân tích tiêu thụ điện nước</span
+                  >
+                  <span class="badge bg-soft-primary">12 tháng gần nhất</span>
+                </div>
+                <div class="card-body px-4 pb-4">
+                  <div class="row g-4 align-items-stretch">
+                    <div class="col-xl-8">
+                      <div class="usage-chart-wrap">
+                        <canvas id="tenantUsageChart" height="130"></canvas>
+                      </div>
+                    </div>
+                    <div class="col-xl-4">
+                      <div class="usage-insight-grid">
+                        <div class="usage-insight-card">
+                          <p class="usage-insight-label mb-1">
+                            Phạm vi theo dõi
+                          </p>
+                          <h6
+                            id="tenantUsageScope"
+                            class="usage-insight-value mb-0"
+                          >
+                            Đang tải...
+                          </h6>
+                        </div>
+                        <div class="usage-insight-card">
+                          <p class="usage-insight-label mb-1">Điện tháng này</p>
+                          <h6
+                            id="tenantElectricityCurrent"
+                            class="usage-insight-value mb-1"
+                          >
+                            0 kWh
+                          </h6>
+                          <small
+                            id="tenantElectricityDelta"
+                            class="usage-delta usage-delta-neutral"
+                            >0% so với tháng trước</small
+                          >
+                        </div>
+                        <div class="usage-insight-card">
+                          <p class="usage-insight-label mb-1">Nước tháng này</p>
+                          <h6
+                            id="tenantWaterCurrent"
+                            class="usage-insight-value mb-1"
+                          >
+                            0 m3
+                          </h6>
+                          <small
+                            id="tenantWaterDelta"
+                            class="usage-delta usage-delta-neutral"
+                            >0% so với tháng trước</small
+                          >
+                        </div>
+                        <div class="usage-insight-card">
+                          <p class="usage-insight-label mb-1">
+                            Cảnh báo bất thường
+                          </p>
+                          <small
+                            id="tenantUsageAlert"
+                            class="usage-delta usage-delta-neutral"
+                            >Chưa phát hiện bất thường.</small
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    id="tenantUsageChartError"
+                    class="alert alert-warning mt-3 mb-0 d-none"
+                    role="alert"
+                  >
+                    Không tải được dữ liệu biểu đồ tiêu thụ. Vui lòng thử lại
+                    sau.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      (() => {
+        const chartCanvas = document.getElementById("tenantUsageChart");
+        if (!chartCanvas || typeof window.Chart === "undefined") {
+          return;
+        }
+
+        const formatter = new Intl.NumberFormat("vi-VN");
+
+        const updateDelta = (elementId, value) => {
+          const element = document.getElementById(elementId);
+          if (!element) {
+            return;
+          }
+
+          const numeric = Number(value || 0);
+          const sign = numeric > 0 ? "+" : "";
+          element.textContent = `${sign}${numeric.toFixed(1)}% so với tháng trước`;
+          element.classList.remove(
+            "usage-delta-up",
+            "usage-delta-down",
+            "usage-delta-neutral",
+          );
+          if (numeric > 0) {
+            element.classList.add("usage-delta-up");
+          } else if (numeric < 0) {
+            element.classList.add("usage-delta-down");
+          } else {
+            element.classList.add("usage-delta-neutral");
+          }
+        };
+
+        fetch("/tenant/analytics/usage-trend", {
+          headers: {
+            Accept: "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to load tenant usage trend");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            new window.Chart(chartCanvas, {
+              type: "line",
+              data: {
+                labels: data.labels || [],
+                datasets: [
+                  {
+                    label: "Điện (kWh)",
+                    data: data.electricitySeries || [],
+                    borderColor: "#1e3a8a",
+                    backgroundColor: "rgba(30,58,138,0.14)",
+                    tension: 0.32,
+                    fill: true,
+                    pointRadius: 3,
+                  },
+                  {
+                    label: "Nước (m3)",
+                    data: data.waterSeries || [],
+                    borderColor: "#0d9488",
+                    backgroundColor: "rgba(13,148,136,0.1)",
+                    tension: 0.32,
+                    fill: true,
+                    pointRadius: 3,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                  mode: "index",
+                  intersect: false,
+                },
+                plugins: {
+                  legend: {
+                    position: "top",
+                    labels: {
+                      usePointStyle: true,
+                    },
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      precision: 0,
+                    },
+                  },
+                },
+              },
+            });
+
+            const scopeText = data.roomNumber
+              ? `Phòng ${data.roomNumber}`
+              : "N/A";
+            const scopeElement = document.getElementById("tenantUsageScope");
+            if (scopeElement) {
+              scopeElement.textContent = scopeText;
+            }
+
+            const electricityCurrent = document.getElementById(
+              "tenantElectricityCurrent",
+            );
+            if (electricityCurrent) {
+              electricityCurrent.textContent = `${formatter.format(data.electricityCurrentMonth || 0)} kWh`;
+            }
+
+            const waterCurrent = document.getElementById("tenantWaterCurrent");
+            if (waterCurrent) {
+              waterCurrent.textContent = `${formatter.format(data.waterCurrentMonth || 0)} m3`;
+            }
+
+            updateDelta(
+              "tenantElectricityDelta",
+              data.electricityVsPreviousPercent,
+            );
+            updateDelta("tenantWaterDelta", data.waterVsPreviousPercent);
+
+            const alertElement = document.getElementById("tenantUsageAlert");
+            if (alertElement) {
+              const alerts = [];
+              if ((data.electricityVsPreviousPercent || 0) > 30) {
+                alerts.push("Điện tăng mạnh so với tháng trước");
+              }
+              if ((data.waterVsPreviousPercent || 0) > 30) {
+                alerts.push("Nước tăng mạnh so với tháng trước");
+              }
+
+              if (alerts.length > 0) {
+                alertElement.textContent = alerts.join("; ");
+                alertElement.classList.remove("usage-delta-neutral");
+                alertElement.classList.add("usage-delta-up");
+              } else {
+                alertElement.textContent = "Chưa phát hiện bất thường.";
+              }
+            }
+          })
+          .catch(() => {
+            const errorAlert = document.getElementById("tenantUsageChartError");
+            if (errorAlert) {
+              errorAlert.classList.remove("d-none");
+            }
+          });
+      })();
+    </script>
+
+    <script>
+      (() => {
+        if (typeof window.EventSource === "undefined") {
+          return;
+        }
+
+        const notificationList = document.getElementById(
+          "tenantNotificationList",
+        );
+        if (!notificationList) {
+          return;
+        }
+
+        const buildNotificationItem = (payload) => {
+          const item = document.createElement("li");
+          item.className =
+            "list-group-item bg-transparent tenant-notif-item tenant-notif-unread";
+
+          const row = document.createElement("div");
+          row.className = "d-flex align-items-start gap-3";
+
+          const iconWrap = document.createElement("span");
+          iconWrap.className = "tenant-notif-icon";
+          iconWrap.innerHTML = '<i class="bi bi-newspaper"></i>';
+
+          const body = document.createElement("div");
+          body.className = "flex-grow-1";
+
+          const titleLine = document.createElement("h6");
+          titleLine.className = "fw-semibold mb-1 d-flex align-items-center";
+
+          const badge = document.createElement("span");
+          badge.className = "badge tenant-badge-new me-2";
+          badge.textContent = "Mới";
+
+          const title = document.createElement("span");
+          title.textContent = payload.title || "Thông báo mới";
+
+          const content = document.createElement("p");
+          content.className = "small text-muted mb-1";
+          content.textContent = payload.content || "";
+
+          const time = document.createElement("small");
+          time.className = "text-secondary";
+          time.innerHTML = '<i class="bi bi-clock me-1"></i>';
+
+          const timeText = document.createElement("span");
+          timeText.textContent = payload.createdAt || "Vừa xong";
+          time.appendChild(timeText);
+
+          titleLine.appendChild(badge);
+          titleLine.appendChild(title);
+
+          body.appendChild(titleLine);
+          body.appendChild(content);
+          body.appendChild(time);
+
+          row.appendChild(iconWrap);
+          row.appendChild(body);
+          item.appendChild(row);
+          return item;
+        };
+
+        const stream =
+          window.portalRealtime && window.portalRealtime.stream
+            ? window.portalRealtime.stream
+            : new EventSource("/tenant/notifications/stream");
+        stream.addEventListener("notification", (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+
+            const emptyState = document.getElementById(
+              "tenantNotificationEmpty",
+            );
+            if (emptyState) {
+              emptyState.remove();
+            }
+
+            const exists = notificationList.querySelector(
+              `.tenant-notif-item[data-id="${payload.id}"]`,
+            );
+            if (exists) {
+              return;
+            }
+
+            const item = buildNotificationItem(payload);
+            if (payload.id) {
+              item.dataset.id = payload.id;
+            }
+
+            notificationList.prepend(item);
+
+            const allItems =
+              notificationList.querySelectorAll(".tenant-notif-item");
+            if (allItems.length > 10) {
+              allItems[allItems.length - 1].remove();
+            }
+          } catch (error) {
+            console.error("Cannot parse realtime notification payload", error);
+          }
+        });
+      })();
+    </script>
+  </body>
 </html>
